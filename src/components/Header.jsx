@@ -53,7 +53,13 @@ const Header = () => {
               </Link>
             </li>
             <li className="nav-item">
-              <a className="nav-link text-white fw-bold" href="#" onClick={() => setIsMenuOpen(false)}>Virar parceiro</a>
+              <Link
+                className="nav-link text-white fw-bold"
+                to="/SolicitarParceria"
+                onClick={() => setIsMenuOpen(false)}
+              >
+               Virar parceiro
+              </Link>
             </li>
 
       {/* isso deve aparecer apenas na tela do parceiro

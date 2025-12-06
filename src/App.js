@@ -21,6 +21,7 @@ import EditarTipoPromocao from './pages/promocao/tipopromocao/EditarTipoPromocao
 import CadastroPromocao from './pages/promocao/CadastroPromocao';
 import EditarPromocao from './pages/promocao/EditarPromocao';
 import SelecionarEventoPontoTuristico from './pages/Reserva';
+import SolicitarParceria from './pages/SolicitarParceria';
 
 
 const App = () => {
@@ -41,6 +42,7 @@ const App = () => {
                         {/* Rotas de Autenticação */}
                         <Route path="/cadastro" element={<Cadastro />} />
                         <Route path="/login" element={<Login />} />
+                        <Route path="/SolicitarParceria" element={<SolicitarParceria />} />
 
                         {/* Rotas de Ponto Turistico */}
                         <Route path="/cadastro-ponto" element={<CadastroPontoTuristico />} />
