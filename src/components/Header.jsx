@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Shield, Menu, X } from 'lucide-react'; 
+import { Shield, Menu, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
+
 
 const Header = () => {
   // Estado para controlar se o menu está aberto ou fechado
@@ -14,7 +15,7 @@ const Header = () => {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark shadow-sm" style={{ backgroundColor: '#3b82f6', padding: '1rem 2rem' }}>
       <div className="container-fluid max-w-7xl">
-        
+
         {/* LOGO */}
         <Link className="navbar-brand d-flex align-items-center gap-2" to="/">
           <Shield size={32} color="#facc15" fill="#facc15" />
@@ -23,9 +24,9 @@ const Header = () => {
 
         {/* BOTÃO TOGGLER (HAMBÚRGUER) */}
         {/* controla o clique manualmente com onClick */}
-        <button 
-          className="navbar-toggler border-0" 
-          type="button" 
+        <button
+          className="navbar-toggler border-0"
+          type="button"
           onClick={toggleMenu}
           aria-expanded={isMenuOpen}
           aria-label="Toggle navigation"
@@ -37,23 +38,37 @@ const Header = () => {
         {/* ITEMS DO MENU */}
         <div className={`collapse navbar-collapse justify-content-end ${isMenuOpen ? 'show' : ''}`} id="navbarNav">
           <ul className="navbar-nav align-items-center gap-4 text-center pt-3 pt-lg-0">
-            
+
             <li className="nav-item">
               {/* onClick={toggleMenu} para fechar o menu ao clicar em um link no mobile */}
               <Link className="nav-link text-white fw-bold" to="/" onClick={() => setIsMenuOpen(false)}>Home</Link>
             </li>
             <li className="nav-item">
-              <a className="nav-link text-white fw-bold" href="#" onClick={() => setIsMenuOpen(false)}>Experiências</a>
+              <Link
+                className="nav-link text-white fw-bold"
+                to="/fazer-reserva"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Fazer reserva
+              </Link>
             </li>
             <li className="nav-item">
-              <a className="nav-link text-white fw-bold" href="#" onClick={() => setIsMenuOpen(false)}>Agenda</a>
+              <a className="nav-link text-white fw-bold" href="#" onClick={() => setIsMenuOpen(false)}>Virar parceiro</a>
             </li>
+
+      {/* isso deve aparecer apenas na tela do parceiro
+
+<li className="nav-item">
+              <a claassName="nav-link text-white fw-bold" href="#" onClick={() => setIsMenuOpen(false)}>Virar parceiro</a>
+            </li>
+*/}
+
 
             {/* Botão Entrar */}
             <li className="nav-item pb-3 pb-lg-0">
-              <Link 
-                to="/login" 
-                className="btn fw-bold px-4 text-decoration-none" 
+              <Link
+                to="/login"
+                className="btn fw-bold px-4 text-decoration-none"
                 style={{ backgroundColor: '#facc15', color: '#3b82f6' }}
                 onClick={() => setIsMenuOpen(false)}
               >

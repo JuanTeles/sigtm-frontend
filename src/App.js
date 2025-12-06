@@ -20,6 +20,7 @@ import CadastroTipoPromocao from './pages/promocao/tipopromocao/CadastroTipoProm
 import EditarTipoPromocao from './pages/promocao/tipopromocao/EditarTipoPromocao';
 import CadastroPromocao from './pages/promocao/CadastroPromocao';
 import EditarPromocao from './pages/promocao/EditarPromocao';
+import SelecionarEventoPontoTuristico from './pages/Reserva';
 
 
 const App = () => {
@@ -50,6 +51,7 @@ const App = () => {
                         <Route path="/cadastro-evento" element={<CadastroEvento />} />
                         <Route path="/editar-evento" element={<EditarEvento />} />
                         <Route path="/eventos" element={<ListaEventos />} />
+                        <Route path="/fazer-reserva" element={<SelecionarEventoPontoTuristico />} />
 
                         {/* Rotas de Promocao */}
                         <Route path="/cadastro-tipo-promocao" element={<CadastroTipoPromocao />} />
