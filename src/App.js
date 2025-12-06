@@ -22,8 +22,8 @@ import CadastroPromocao from './pages/promocao/CadastroPromocao';
 import EditarPromocao from './pages/promocao/EditarPromocao';
 import SelecionarEventoPontoTuristico from './pages/Reserva';
 import SolicitarParceria from './pages/SolicitarParceria';
-
-
+import TelaListagemSolicitacoes from './pages/TelaListagemSolicitacoes';
+import TelaPainelAdmin from './pages/TelaPainelAdmin';
 const App = () => {
     return (
         <Router>
@@ -42,8 +42,7 @@ const App = () => {
                         {/* Rotas de Autenticação */}
                         <Route path="/cadastro" element={<Cadastro />} />
                         <Route path="/login" element={<Login />} />
-                        <Route path="/SolicitarParceria" element={<SolicitarParceria />} />
-
+                       
                         {/* Rotas de Ponto Turistico */}
                         <Route path="/cadastro-ponto" element={<CadastroPontoTuristico />} />
                         <Route path="/editar-ponto" element={<EditarPontoTuristico />} />
@@ -63,6 +62,15 @@ const App = () => {
 
                         {/* Rota 404 para urls erradas */}
                         <Route path="*" element={<div className="text-center mt-5">Página não encontrada</div>} />
+
+                        {/* Rotas de parceria*/}
+                        <Route path="/SolicitarParceria" element={<SolicitarParceria />} />
+                        <Route path="/TelaListagemSolicitacoes" element={<TelaListagemSolicitacoes />} />
+
+
+                        {/* Rota do Painel Admin */}
+                        <Route path="/admin" element={<TelaPainelAdmin />} />
+
                     </Routes>
                 </main>
 
