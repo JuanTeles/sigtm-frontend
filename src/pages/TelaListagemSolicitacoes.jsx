@@ -1,37 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const TelaListagemSolicitacoes = () => {
   // Dados simulados (3 entidades de exemplo)
-  const solicitacoes = [
-    {
-      id: 1,
-      parceiro: "João da Silva",
-      empresa: "Restaurante Sabor do Sertão",
-      cnpj: "12.345.678/0001-90",
-      email: "contato@sabordosertao.com",
-      telefone: "(74) 99988-1234",
-      status: "Pendente"
-    },
-    {
-      id: 2,
-      parceiro: "Maria Oliveira",
-      empresa: "Pousada Raio de Sol",
-      cnpj: "98.765.432/0001-10",
-      email: "reserva@pousadaraio.com.br",
-      telefone: "(74) 98877-5678",
-      status: "Pendente"
-    },
-    {
-      id: 3,
-      parceiro: "Carlos Empreendimentos",
-      empresa: "Irecê Eventos Ltda",
-      cnpj: "45.123.789/0001-55",
-      email: "financeiro@ireceeventos.com",
-      telefone: "(74) 3641-0000",
-      status: "Análise"
-    }
-  ];
+const [solicitacoes, setSolicitacoes] = useState([
+    { id: 1, parceiro: "João da Silva", empresa: "Restaurante Sabor", cnpj: "12.345.678/0001-90", status: "Pendente" },
+    { id: 2, parceiro: "Maria Oliveira", empresa: "Pousada Sol", cnpj: "98.765.432/0001-10", status: "Pendente" },
+  ]);
+
+  // Estados para Modais
+  const [showModalRecusar, setShowModalRecusar] = useState(false);
+  const [itemSelecionado, setItemSelecionado] = useState(null);
+
+  // Ação de clique no botão "Recusar"
+  const handleClickRecusar = (item) => {
+    setItemSelecionado(item);
+    setShowModalRecusar(true);
+  };
+
+  // Confirmação da recusa
+  const handleConfirmarRecusa = () => {
+    setSolicitacoes(solicitacoes.filter(s => s.id !== itemSelecionado.id));
+    setShowModalRecusar(false);
+    alert("Solicitação recusada e removida.");
+  };
 
   return (
     <div className="min-vh-100 bg-light py-5 font-sans">
@@ -70,7 +62,6 @@ const TelaListagemSolicitacoes = () => {
             </button>
           </div>
 
-          {/* Tabela Responsiva */}
           <div className="table-responsive">
             <table className="table table-hover align-middle mb-0">
               <thead className="bg-light">
@@ -122,7 +113,10 @@ const TelaListagemSolicitacoes = () => {
                     {/* Coluna Ações */}
                     <td className="text-end pe-4 border-bottom-0">
                       <div className="d-flex justify-content-end gap-2">
-                        <button className="btn btn-outline-danger btn-sm rounded-3 border-0 px-2" title="Recusar">
+                        <button onClick={() => handleClickRecusar(item)}
+                            className="btn btn-outline-danger btn-sm rounded-3 border-0 px-2" 
+                            title="Recusar"
+                        >
                           ❌
                         </button>
                         <button className="btn btn-success btn-sm rounded-3 px-3 fw-bold shadow-sm" title="Aprovar">
@@ -152,7 +146,29 @@ const TelaListagemSolicitacoes = () => {
 
         </div>
       </div>
+
+{/* --- MODAL DE CONFIRMAÇÃO (RECUSAR) --- */}
+      {showModalRecusar && (
+        <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
+          <div className="bg-white p-4 rounded-4 shadow-lg text-center m-3" style={{ maxWidth: '380px' }}>
+            <div className="mb-3 text-warning" style={{ fontSize: '3rem' }}>🚫</div>
+            <h4 className="fw-bold text-dark mb-2">Recusar Solicitação?</h4>
+            <p className="text-muted mb-4">
+              Deseja realmente recusar a parceria de <strong>{itemSelecionado?.empresa}</strong>?
+            </p>
+            <div className="d-grid gap-2 d-flex justify-content-center">
+                <button onClick={() => setShowModalRecusar(false)} className="btn btn-light rounded-pill px-4 fw-bold">Cancelar</button>
+                <button onClick={handleConfirmarRecusa} className="btn btn-danger rounded-pill px-4 fw-bold shadow-sm">Confirmar Recusa</button>
+            </div>
+          </div>
+        </div>
+      )}
+      
     </div>
+
+
+
+
   );
 };
 
