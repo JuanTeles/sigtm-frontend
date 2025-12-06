@@ -24,6 +24,8 @@ import SelecionarEventoPontoTuristico from './pages/Reserva';
 import SolicitarParceria from './pages/SolicitarParceria';
 import TelaListagemSolicitacoes from './pages/TelaListagemSolicitacoes';
 import TelaPainelAdmin from './pages/TelaPainelAdmin';
+import TelaListaParceiros from './pages/Parceiros';
+
 const App = () => {
     return (
         <Router>
@@ -66,7 +68,7 @@ const App = () => {
                         {/* Rotas de parceria*/}
                         <Route path="/SolicitarParceria" element={<SolicitarParceria />} />
                         <Route path="/TelaListagemSolicitacoes" element={<TelaListagemSolicitacoes />} />
-
+                        <Route path="/parceiros" element={<TelaListaParceiros />} />
 
                         {/* Rota do Painel Admin */}
                         <Route path="/admin" element={<TelaPainelAdmin />} />

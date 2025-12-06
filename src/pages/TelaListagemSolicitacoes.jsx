@@ -43,9 +43,7 @@ const TelaListagemSolicitacoes = () => {
             <h2 className="fw-bold text-primary m-0">Solicitações de Parceria</h2>
             <p className="text-muted small m-0">Gerencie os novos pedidos de cadastro.</p>
           </div>
-          <button className="btn btn-primary rounded-pill px-4 py-2 shadow-sm fw-bold">
-            <span className="me-2">＋</span> Nova Solicitação
-          </button>
+  
         </div>
 
         {/* CARD PRINCIPAL DA TABELA */}

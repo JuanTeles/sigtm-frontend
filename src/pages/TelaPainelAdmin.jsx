@@ -11,7 +11,7 @@ const TelaPainelAdmin = () => {
       titulo: "Solicitações",
       descricao: "Gerenciar pedidos de parceria pendentes.",
       icone: "📋",
-      rota: "/TelaListagemSolicitacoes", // Rota que criamos anteriormente
+      rota: "/TelaListagemSolicitacoes", 
       cor: "primary"
     },
     {
@@ -25,7 +25,7 @@ const TelaPainelAdmin = () => {
       titulo: "Eventos",
       descricao: "Gerenciar calendário de eventos da cidade.",
       icone: "📅",
-      rota: "/eventos", // Rota existente no seu App.js
+      rota: "/eventos", 
       cor: "warning"
     },
     {
@@ -46,7 +46,7 @@ const TelaPainelAdmin = () => {
       titulo: "Parceiros",
       descricao: "Ver lista de empresas parceiras aceitas.",
       icone: "🤝",
-      rota: "/parceiros", // Rota futura/exemplo
+      rota: "/parceiros",
       cor: "secondary"
     }
   ];
