@@ -17,11 +17,10 @@ const SolicitarParceria = () => {
     setLoading(true); 
 
     const usuarioIdFixo = 1; 
-
     
     const dadosParaEnvio = {
-        cnpj: cnpj,
-        nome: nomeEmpresa, 
+      cnpj: cnpj,
+        nomeEmpresa: nomeEmpresa, 
         usuarioId: usuarioIdFixo
     };
 
