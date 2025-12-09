@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getPontosTuristicos } from '../../api/pontoTuristicoService';
+// 1. Adicionada a importação de deletePontoTuristico
+import { getPontosTuristicos, deletePontoTuristico } from '../../api/pontoTuristicoService';
 import { FaMapMarkerAlt, FaPen, FaTrash, FaPlus } from 'react-icons/fa';
 import '../../css/PontoTuristico.css';
 
@@ -35,9 +36,26 @@ function ListaPontosTuristicos() {
     navigate('/pontos-turisticos/novo');
   };
 
-  // Função para navegar para a edição (exemplo de implementação)
+  // Função para navegar para a edição
   const handleEditarPonto = (id) => {
     navigate(`/pontos-turisticos/editar/${id}`);
+  };
+
+  // 2. Nova lógica para remover o ponto turístico
+  const handleDelete = async (id) => {
+    const confirmacao = window.confirm("Tem certeza que deseja excluir este ponto turístico?");
+    
+    if (confirmacao) {
+      try {
+        await deletePontoTuristico(id);
+        // Atualiza o estado removendo o item excluído sem precisar recarregar a tela
+        setPontos(pontosAtual => pontosAtual.filter(ponto => ponto.id !== id));
+        alert("Ponto turístico removido com sucesso!");
+      } catch (err) {
+        console.error("Erro ao deletar ponto:", err);
+        alert("Erro ao excluir o ponto turístico. Tente novamente.");
+      }
+    }
   };
 
   if (loading) return <div className="page-container"><p>Carregando dados...</p></div>;
@@ -78,7 +96,6 @@ function ListaPontosTuristicos() {
                     </div>
                   </td>
                   <td>
-                    {/* CORREÇÃO AQUI: Uso de ?. e troca de .uf por .estado */}
                     {ponto.endereco 
                       ? `${ponto.endereco.cidade} - ${ponto.endereco.estado}`
                       : 'Endereço não informado'}
@@ -95,10 +112,12 @@ function ListaPontosTuristicos() {
                       >
                         <FaPen size={12} />
                       </button>
+                      
+                      {/* 3. Evento onClick adicionado ao botão de excluir */}
                       <button 
                         className="btn-action btn-delete" 
                         title="Excluir"
-                        // Adicione aqui sua função de deletar, ex: onClick={() => handleDelete(ponto.id)}
+                        onClick={() => handleDelete(ponto.id)}
                       >
                         <FaTrash size={12} />
                       </button>

@@ -57,7 +57,7 @@ const Header = () => {
             <li className="nav-item">
               <Link
                 className="nav-link text-white fw-bold"
-                to="/fazer-reserva"
+                to="/reservas"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Fazer reserva
@@ -66,7 +66,7 @@ const Header = () => {
             <li className="nav-item">
               <Link
                 className="nav-link text-white fw-bold"
-                to="/SolicitarParceria"
+                to="/solicitar-parceria"
                 onClick={() => setIsMenuOpen(false)}
               >
                Virar parceiro
