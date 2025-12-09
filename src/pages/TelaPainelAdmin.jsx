@@ -28,20 +28,20 @@ const TelaPainelAdmin = () => {
       rota: "/eventos", 
       cor: "warning"
     },
-    {
+   /* {
       titulo: "Promoções",
       descricao: "Visualizar campanhas e ofertas ativas.",
       icone: "🏷️",
       rota: "/cadastro-promocao", // Ajuste conforme sua rota de listagem
       cor: "danger"
     },
-    {
+   {
       titulo: "Usuários",
       descricao: "Administrar contas de usuários cadastrados.",
       icone: "👥",
       rota: "/usuarios", // Rota futura/exemplo
       cor: "info"
-    },
+    },*/
     {
       titulo: "Parceiros",
       descricao: "Ver lista de empresas parceiras aceitas.",
