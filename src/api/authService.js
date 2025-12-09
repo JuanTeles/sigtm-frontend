@@ -2,26 +2,52 @@
 import api from './axiosConfig';
 
 /**
- * Envia as credenciais para obter o token JWT.
- * Endpoint no Backend: POST /sessao (AuthController)
- * @param {string} login (email ou cpf)
- * @param {string} senha
+ * Endpoint de Login
+ * Backend: POST /auth/login
  */
 export const loginRequest = async (login, senha) => {
     try {
-        const response = await api.post('/sessao', { 
-            login, 
+        const response = await api.post('/auth/login', { 
+            email: login, 
             senha 
         });
-        return response.data; // Retorna o SessaoResponseDTO (token + dados user)
+        return response.data; 
     } catch (error) {
         throw error;
     }
 };
 
-export const logoutRequest = () => {
-    // Se o backend tiver um endpoint de logout (blacklist de token), chame aqui.
-    // Caso contrário, apenas limpamos o local no frontend (feito no Context).
-    localStorage.removeItem('token');
+/**
+ * --- MUDANÇA AQUI ---
+ * Antes: Recebia apenas dados de login (email/senha)
+ * Agora: Recebe o objeto UNIFICADO (login + dados pessoais aninhados)
+ * * O JSON enviado será algo como:
+ * {
+ * "email": "...",
+ * "senha": "...",
+ * "tipoUsuarioId": 2,
+ * "usuarioComum": { "nome": "...", "cpf": "..." }
+ * }
+ */
+export const createUsuario = async (dadosUnificados) => {
+    // Backend: UsuarioController -> /usuarios/save
+    // O axios converte 'dadosUnificados' para JSON automaticamente
+    const response = await api.post('/usuarios/save', dadosUnificados);
+    return response.data;
+};
+
+// A função 'createUsuarioComum' foi REMOVIDA pois não deve ser usada isoladamente.
+
+export const logoutRequest = async () => {
+    try {
+        await api.post('/auth/logout');
+    } catch (e) {
+        console.error("Erro ao fazer logout no servidor", e);
+    }
     localStorage.removeItem('user');
+};
+
+export const getCurrentUser = () => {
+    const userJson = localStorage.getItem('user');
+    return userJson ? JSON.parse(userJson) : null;
 };

@@ -1,0 +1,179 @@
+/* src/css/PontosTuristicos.css */
+
+/* =========================================
+   PARTE 1: ESTILOS DA LISTAGEM (Tabela)
+   ========================================= */
+
+.page-container {
+  padding: 40px;
+  background-color: #f8f9fa; /* Fundo cinza claro */
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.header-section h1 {
+  font-size: 24px;
+  font-weight: 800;
+  color: #333;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.btn-novo {
+  background-color: #007bff; /* Azul vibrante */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.3s;
+}
+
+.btn-novo:hover {
+  background-color: #0056b3;
+}
+
+/* Estilo do Card Branco (Usado na Tabela e pode ser usado no Form) */
+.content-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  padding: 20px;
+}
+
+/* Tabela */
+.custom-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 15px;
+}
+
+.custom-table th {
+  text-align: left;
+  color: #888;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 10px 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.custom-table td {
+  padding: 15px;
+  vertical-align: middle;
+  color: #333;
+  font-weight: 500;
+}
+
+/* Ícone de localização azul */
+.icon-loc {
+  background-color: #e6f0ff;
+  color: #007bff;
+  padding: 10px;
+  border-radius: 50%;
+  margin-right: 15px;
+  display: inline-flex;
+}
+
+.cell-nome {
+  display: flex;
+  align-items: center;
+}
+
+/* Ações (Botões editar/excluir) */
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-action {
+  border: none;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-edit {
+  background-color: #e6f0ff;
+  color: #007bff;
+}
+
+.btn-delete {
+  background-color: #ffe6e6;
+  color: #dc3545;
+}
+
+.btn-action:hover {
+  filter: brightness(0.95);
+}
+
+/* =========================================
+   PARTE 2: ESTILOS DO CADASTRO (Formulário)
+   ========================================= */
+
+/* O cartão cinza de fundo onde ficam os inputs (#e5e7eb) */
+.form-card-gray {
+  background-color: #e5e7eb;
+  padding: 3rem;           /* Equivalente a p-5 */
+  border-radius: 0.375rem; /* Equivalente a rounded */
+  box-shadow: 0 .125rem .25rem rgba(0,0,0,.075); /* shadow-sm */
+}
+
+/* Inputs sem borda e com padding maior (Estilo Clean) */
+.form-control-clean {
+  border: 0 !important;
+  padding: 1rem !important; /* p-3 */
+  background-color: #fff;
+}
+
+/* Labels estilizados */
+.form-label-bold {
+  font-weight: bold;
+  color: #6c757d; /* text-secondary */
+  font-size: 0.875em; /* small */
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+/* Botão Azul em formato de Pílula (Para os botões Salvar/Cancelar) */
+.btn-pill-blue {
+  background-color: #3b82f6; /* Azul específico do design */
+  color: white;
+  border: none;
+  border-radius: 50rem; /* rounded-pill */
+  padding: 0.5rem 3rem; /* px-5 py-2 */
+  font-weight: 700;     /* fw-bold */
+  box-shadow: 0 .5rem 1rem rgba(0,0,0,.15); /* shadow */
+  min-width: 160px;
+  transition: background-color 0.3s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none; /* Para quando for Link */
+}
+
+.btn-pill-blue:hover {
+  background-color: #2563eb; /* Tom levemente mais escuro */
+  color: white;
+}
+
+.btn-pill-blue:disabled {
+  background-color: #93c5fd;
+  cursor: not-allowed;
+}

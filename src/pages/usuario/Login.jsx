@@ -1,27 +1,33 @@
 // src/pages/usuario/Login.jsx
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../contexts/authContext"; // Importa o hook
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/authContext"; 
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
-//import "../usuario/Login.css"; 
+
+// Importa o CSS criado acima
+import "../../css/Login.css"; 
 
 const Login = () => {
+  // Estados de dados (Backend)
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
   
-  const { signIn } = useAuth(); // Pega a função de login do contexto
+  // Estado visual (Mostrar/Esconder senha)
+  const [showPassword, setShowPassword] = useState(false);
+
+  const { signIn } = useAuth(); 
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setErro(""); // Limpa erros anteriores
+    setErro(""); 
 
     const resultado = await signIn(email, senha);
 
     if (resultado.success) {
-      navigate("/"); // Redireciona para a Home ou Dashboard
+      navigate("/"); 
     } else {
       setErro(resultado.message);
     }
@@ -29,37 +35,87 @@ const Login = () => {
 
   return (
     <>
-      <Header />
-      <div className="login-container">
-        <h2>Login</h2>
-        <form onSubmit={handleLogin} className="login-form">
-          <div className="form-group">
-            <label htmlFor="email">Email ou CPF:</label>
-            <input
-              type="text"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="senha">Senha:</label>
-            <input
-              type="password"
-              id="senha"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              required
-            />
-          </div>
-          
-          {erro && <p style={{ color: 'red', textAlign: 'center' }}>{erro}</p>}
+      
+      {/* Container principal com fundo cinza escuro (estilo no CSS) */}
+      <div className="login-wrapper">
+        
+        {/* O Cartão Branco de Login */}
+        <div className="card border-0 rounded-3 shadow p-4 bg-white login-card">
+          <div className="card-body">
+            
+            <h3 className="text-center fw-bold mb-4">LOGIN</h3>
 
-          <button type="submit" className="login-btn">Entrar</button>
-        </form>
+            <form onSubmit={handleLogin}>
+              {/* Campo Email / CPF */}
+              <div className="mb-3">
+                <label htmlFor="emailInput" className="form-label form-label-custom">
+                  Email ou CPF
+                </label>
+                <input 
+                  type="text" 
+                  className="form-control py-2" 
+                  id="emailInput" 
+                  placeholder="exemplo@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+
+              {/* Campo Senha */}
+              <div className="mb-3">
+                <label htmlFor="passwordInput" className="form-label form-label-custom">
+                  Senha
+                </label>
+                <input 
+                  type={showPassword ? "text" : "password"} // Muda o tipo dinamicamente
+                  className="form-control py-2" 
+                  id="passwordInput" 
+                  placeholder="Digite sua senha"
+                  value={senha}
+                  onChange={(e) => setSenha(e.target.value)}
+                  required
+                />
+              </div>
+
+              {/* Checkbox e Link de Cadastro */}
+              <div className="mb-4">
+                <div className="form-check mb-2">
+                  <input 
+                    className="form-check-input bg-dark border-dark" 
+                    type="checkbox" 
+                    id="showPasswordCheck"
+                    checked={showPassword}
+                    onChange={() => setShowPassword(!showPassword)}
+                  />
+                  <label className="form-check-label small fw-bold text-dark" htmlFor="showPasswordCheck">
+                    Mostrar a senha
+                  </label>
+                </div>
+                
+                {/* Link para cadastro */}
+                <div className="small text-secondary">
+                  Não tem conta? <Link to="/cadastro" className="text-dark fw-bold text-decoration-underline">Cadastre-se</Link>
+                </div>
+              </div>
+
+              {/* Exibição de Erros (Backend) */}
+              {erro && <p className="error-message">{erro}</p>}
+
+              {/* Botão de Entrar */}
+              <button 
+                type="submit" 
+                className="btn btn-dark w-100 py-2 btn-custom-dark"
+              >
+                ENTRAR
+              </button>
+
+            </form>
+          </div>
+        </div>
+
       </div>
-      <Footer />
+      
     </>
   );
 };
