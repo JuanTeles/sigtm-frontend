@@ -36,6 +36,9 @@ import CadastroPromocao from './pages/promocao/CadastroPromocao';
 import EditarPromocao from './pages/promocao/EditarPromocao';
 import CadastroTipoPromocao from './pages/promocao/tipopromocao/CadastroTipoPromocao';
 import EditarTipoPromocao from './pages/promocao/tipopromocao/EditarTipoPromocao';
+import ListarTiposPromocao from './pages/promocao/tipopromocao/ListarTiposPromocao';
+import ListarPromocoes from './pages/promocao/ListarPromocoes';
+
 
 function App() {
   return (
@@ -72,6 +75,8 @@ function App() {
             <Route path="/promocoes/editar/:id" element={<EditarPromocao />} />
             <Route path="/tipos-promocao/novo" element={<CadastroTipoPromocao />} />
             <Route path="/tipos-promocao/editar/:id" element={<EditarTipoPromocao />} />
+            <Route path="/promocoes" element={<ListarPromocoes />} />
+            <Route path="/tipos-promocao" element={<ListarTiposPromocao />} />
 
             {/* --- Administração --- */}
             <Route path="/admin" element={<TelaPainelAdmin />} />

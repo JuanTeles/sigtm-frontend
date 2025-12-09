@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom'; 
+import { Tag } from 'lucide-react';
 import { 
   MapPin, 
   Calendar, 
@@ -67,7 +68,9 @@ const Home = () => {
                         <p className="text-secondary fs-5 mb-4">Explore lindos lugares e tenha experiências unicas</p>
 
                         <div className="row g-3">
-                            <div className="col-md-6">
+
+                            {/* Botão Pontos Turísticos */}
+                            <div className="col-md-4">
                                 <Link 
                                     to="/pontos-turisticos" 
                                     className="btn w-100 py-3 rounded-pill text-white d-flex align-items-center justify-content-center gap-2 shadow-sm text-decoration-none" 
@@ -80,7 +83,9 @@ const Home = () => {
                                     </div>
                                 </Link>
                             </div>
-                            <div className="col-md-6">
+
+                            {/* Botão Agenda de Eventos */}
+                            <div className="col-md-4">
                                 <Link 
                                     to="/eventos" 
                                     className="btn w-100 py-3 rounded-pill text-dark d-flex align-items-center justify-content-center gap-2 shadow-sm text-decoration-none" 
@@ -93,7 +98,24 @@ const Home = () => {
                                     </div>
                                 </Link>
                             </div>
+
+                            {/* ⭐ NOVO BOTÃO – PROMOÇÕES */}
+                            <div className="col-md-4">
+                                <Link 
+                                    to="/promocoes" 
+                                    className="btn w-100 py-3 rounded-pill text-dark d-flex align-items-center justify-content-center gap-2 shadow-sm text-decoration-none" 
+                                    style={{ backgroundColor: '#61dafb' }} 
+                                >
+                                    <div className="bg-white bg-opacity-25 rounded-circle p-1"><Tag size={20} /></div>
+                                    <div className="text-start lh-1">
+                                        <div className="fw-bold">Promoções</div>
+                                        <div style={{ fontSize: '0.75rem', opacity: 0.9 }}>Ofertas e experiências imperdíveis</div>
+                                    </div>
+                                </Link>
+                            </div>
+
                         </div>
+
                     </div>
                 </div>
 
