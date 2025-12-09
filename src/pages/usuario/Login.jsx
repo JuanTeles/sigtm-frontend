@@ -1,76 +1,66 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom'; // Import essencial para navegar entre páginas
+// src/pages/usuario/Login.jsx
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/authContext"; // Importa o hook
+import Header from "../../components/Header";
+import Footer from "../../components/Footer";
+//import "../usuario/Login.css"; 
 
 const Login = () => {
-  // Estado para controlar se mostra ou esconde a senha
-  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [erro, setErro] = useState("");
+  
+  const { signIn } = useAuth(); // Pega a função de login do contexto
+  const navigate = useNavigate();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setErro(""); // Limpa erros anteriores
+
+    const resultado = await signIn(email, senha);
+
+    if (resultado.success) {
+      navigate("/"); // Redireciona para a Home ou Dashboard
+    } else {
+      setErro(resultado.message);
+    }
+  };
 
   return (
-    // Container principal com fundo cinza escuro, ocupando toda a altura disponível
-    <div className="d-flex align-items-center justify-content-center w-100 py-5" style={{ backgroundColor: '#7d7d7d', minHeight: '100%' }}>
-      
-      {/* O Cartão Branco de Login */}
-      <div className="card border-0 rounded-3 shadow p-4 bg-white" style={{ width: '100%', maxWidth: '400px' }}>
-        <div className="card-body">
+    <>
+      <Header />
+      <div className="login-container">
+        <h2>Login</h2>
+        <form onSubmit={handleLogin} className="login-form">
+          <div className="form-group">
+            <label htmlFor="email">Email ou CPF:</label>
+            <input
+              type="text"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="senha">Senha:</label>
+            <input
+              type="password"
+              id="senha"
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              required
+            />
+          </div>
           
-          <form>
-            {/* Campo Email */}
-            <div className="mb-3">
-              <label htmlFor="emailInput" className="form-label fw-bold text-secondary small">Email</label>
-              <input 
-                type="email" 
-                className="form-control py-2" 
-                id="emailInput" 
-                placeholder="" 
-              />
-            </div>
+          {erro && <p style={{ color: 'red', textAlign: 'center' }}>{erro}</p>}
 
-            {/* Campo Senha */}
-            <div className="mb-3">
-              <label htmlFor="passwordInput" className="form-label fw-bold text-secondary small">Senha</label>
-              <input 
-                type={showPassword ? "text" : "password"} // Muda o tipo dinamicamente
-                className="form-control py-2" 
-                id="passwordInput" 
-                placeholder="" 
-              />
-            </div>
-
-            {/* Checkbox e Link de Cadastro */}
-            <div className="mb-4">
-              <div className="form-check mb-2">
-                <input 
-                  className="form-check-input bg-dark border-dark" 
-                  type="checkbox" 
-                  id="showPasswordCheck"
-                  checked={showPassword}
-                  onChange={() => setShowPassword(!showPassword)}
-                />
-                <label className="form-check-label small fw-bold text-dark" htmlFor="showPasswordCheck">
-                  Mostrar a senha
-                </label>
-              </div>
-              
-              {/* AQUI ESTÁ A MÁGICA: O Link leva para a rota /cadastro */}
-              <div className="small text-secondary">
-                Não tem conta? <Link to="/cadastro" className="text-dark fw-bold text-decoration-underline">Cadastre-se</Link>
-              </div>
-            </div>
-
-            {/* Botão de Login (Register) */}
-            <button 
-              type="submit" 
-              className="btn btn-dark w-100 py-2" 
-              style={{ backgroundColor: '#212529', borderRadius: '4px' }}
-            >
-              Entrar
-            </button>
-
-          </form>
-        </div>
+          <button type="submit" className="login-btn">Entrar</button>
+        </form>
       </div>
-
-    </div>
+      <Footer />
+    </>
   );
 };
 

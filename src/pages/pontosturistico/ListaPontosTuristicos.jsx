@@ -1,101 +1,86 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Edit, Trash2, Plus, MapPin } from 'lucide-react';
+// src/pages/pontosturistico/ListaPontosTuristicos.jsx
 
-const ListaPontosTuristicos = () => {
-  // --- SIMULAÇÃO DE PERMISSÃO ---
-  // Futuramente, você pegará isso do seu AuthContext ou localStorage
-  // Tente mudar para 'user' para ver os botões sumirem!
-  const userRole = 'admin'; 
-  const isAdmin = userRole === 'admin';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // <--- 1. Importe isso
+import { getPontosTuristicos } from '../../api/pontoTuristicoService';
+import { FaMapMarkerAlt, FaPen, FaTrash, FaPlus } from 'react-icons/fa';
+import '../../css/PontosTuristicos.css';
 
-  // Futuramente, isso virá da sua API Java (ex: axios.get('/api/pontos'))
-  const pontos = [
-    { id: 1, nome: "Praça do Feijão", cidade: "Irecê", estado: "BA", bairro: "Centro" },
-    { id: 2, nome: "Mercadão Municipal", cidade: "Irecê", estado: "BA", bairro: "Centro" },
-    { id: 3, nome: "Cachoeira do Ferro Doido", cidade: "Morro do Chapéu", estado: "BA", bairro: "Zona Rural" },
-  ];
+function ListaPontosTuristicos() {
+  const navigate = useNavigate(); // <--- 2. Inicialize o hook de navegação
+  
+  const [pontos, setPontos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    // ... (mesmo código do useEffect anterior) ...
+    const buscarPontos = async () => {
+      try {
+        const dados = await getPontosTuristicos();
+        setPontos(dados);
+      } catch (err) {
+        setError(err.response?.data?.message || 'Não foi possível carregar os dados.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    buscarPontos();
+  }, []);
+
+  // Função para navegar para a tela de cadastro
+  const handleNovoPonto = () => {
+    navigate('/pontos-turisticos/novo'); // <--- 3. Defina a rota de destino aqui
+  };
+
+  if (loading) return <div className="page-container"><p>Carregando...</p></div>;
+  if (error) return <div className="page-container"><p style={{ color: 'red' }}>Erro: {error}</p></div>;
 
   return (
-    <div className="container py-5">
-      
-      {/* Cabeçalho da Lista */}
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="fw-bold mb-0">PONTOS TURÍSTICOS</h1>
+    <div className="page-container">
+      <div className="header-section">
+        <h1>Pontos Turísticos</h1>
         
-        {/* Renderização Condicional: Só mostra o botão se for ADMIN */}
-        {isAdmin && (
-          <Link 
-            to="/cadastro-ponto" 
-            className="btn text-white fw-bold rounded-pill px-4 py-2 d-flex align-items-center gap-2 shadow-sm"
-            style={{ backgroundColor: '#3b82f6' }}
-          >
-            <Plus size={20} /> Novo Ponto
-          </Link>
-        )}
+        <button className="btn-novo" onClick={handleNovoPonto}>
+          <FaPlus /> Novo Ponto
+        </button>
       </div>
 
-      {/* Tabela de Listagem */}
-      <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
-        <div className="table-responsive">
-          <table className="table table-hover mb-0 align-middle">
-            <thead className="bg-light">
-              <tr>
-                <th className="py-3 ps-4 text-secondary small text-uppercase">Nome</th>
-                <th className="py-3 text-secondary small text-uppercase">Localização</th>
-                <th className="py-3 text-secondary small text-uppercase">Bairro</th>
-                <th className="py-3 text-end pe-4 text-secondary small text-uppercase">Ações</th>
+      <div className="content-card">
+        <table className="custom-table">
+           {/* ... (Restante da tabela igual ao anterior) ... */}
+           <thead>
+            <tr>
+              <th>NOME</th>
+              <th>LOCALIZAÇÃO</th>
+              <th>BAIRRO</th>
+              <th>AÇÕES</th>
+            </tr>
+          </thead>
+          <tbody>
+            {pontos.map((ponto) => (
+              <tr key={ponto.id}>
+                <td>
+                  <div className="cell-nome">
+                    <span className="icon-loc"><FaMapMarkerAlt size={16} /></span>
+                    {ponto.nome}
+                  </div>
+                </td>
+                <td>{ponto.endereco.cidade}-{ponto.endereco.uf}</td>
+                <td>{ponto.endereco.bairro || 'Centro'}</td>
+                <td>
+                  <div className="actions">
+                    <button className="btn-action btn-edit"><FaPen size={12} /></button>
+                    <button className="btn-action btn-delete"><FaTrash size={12} /></button>
+                  </div>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {pontos.map((ponto) => (
-                <tr key={ponto.id}>
-                  <td className="ps-4 py-3 fw-bold text-dark">
-                    <div className="d-flex align-items-center gap-2">
-                      <div className="bg-blue-100 text-blue-600 p-2 rounded-circle bg-opacity-10" style={{ backgroundColor: '#eff6ff', color: '#3b82f6' }}>
-                        <MapPin size={18} />
-                      </div>
-                      {ponto.nome}
-                    </div>
-                  </td>
-                  <td className="text-secondary">{ponto.cidade} - {ponto.estado}</td>
-                  <td className="text-secondary">{ponto.bairro}</td>
-                  <td className="text-end pe-4">
-                    <div className="d-flex justify-content-end gap-2">
-                      
-                      {/* Renderização Condicional das Ações */}
-                      {isAdmin ? (
-                        <>
-                          {/* Botão Editar */}
-                          <Link 
-                            to="/editar-ponto" 
-                            className="btn btn-sm btn-outline-primary border-0 bg-primary bg-opacity-10 text-primary rounded-circle p-2"
-                            title="Editar"
-                          >
-                            <Edit size={18} />
-                          </Link>
-                          {/* Botão Excluir (Visual) */}
-                          <button 
-                            className="btn btn-sm btn-outline-danger border-0 bg-danger bg-opacity-10 text-danger rounded-circle p-2"
-                            title="Excluir"
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        </>
-                      ) : (
-                        <span className="text-muted small fst-italic">Somente leitura</span>
-                      )}
-
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
-};
+}
 
 export default ListaPontosTuristicos;
