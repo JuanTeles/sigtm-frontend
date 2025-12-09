@@ -1,25 +1,54 @@
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+// 1. Importamos o service que criamos no passo anterior
+import { createSolicitacao } from '../api/SolicitacaoService';
 
 const SolicitarParceria = () => {
-  // Estado para controlar se o modal está visível ou não
+
   const [exibirModal, setExibirModal] = useState(false);
 
-  // Função disparada ao enviar o formulário
-  const handleSolicitar = (e) => {
-    e.preventDefault(); // Evita o recarregamento padrão da página
-    setExibirModal(true); // Mostra o modal
+  const [cnpj, setCnpj] = useState('');
+  const [nomeEmpresa, setNomeEmpresa] = useState('');
+
+  const [loading, setLoading] = useState(false);
+
+  const handleSolicitar = async (e) => {
+    e.preventDefault(); 
+    setLoading(true); 
+
+    const usuarioIdFixo = 1; 
+
+    
+    const dadosParaEnvio = {
+        cnpj: cnpj,
+        nome: nomeEmpresa, 
+        usuarioId: usuarioIdFixo
+    };
+
+    try {
+
+        await createSolicitacao(dadosParaEnvio);
+
+        setExibirModal(true);
+        
+        setCnpj('');
+        setNomeEmpresa('');
+
+    } catch (error) {
+        console.error("Erro ao solicitar:", error);
+        alert("Erro ao enviar a solicitação. Verifique se o Backend está rodando.");
+    } finally {
+        setLoading(false); 
+    }
   };
 
-  // Função para redirecionar (aqui simulamos indo para a home '/')
   const handleVoltarInicio = () => {
-    window.location.href = '/'; // Redireciona para a raiz
+    window.location.href = '/'; 
   };
 
   return (
     <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light py-5 font-sans position-relative">
       
-      {/* --- INÍCIO DO CONTEÚDO DA TELA --- */}
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-12 col-md-8 col-lg-5">
@@ -46,6 +75,9 @@ const SolicitarParceria = () => {
                     id="cnpjInput"
                     className="form-control form-control-lg rounded-3 bg-light border-0 shadow-sm text-secondary fw-semibold p-3"
                     placeholder="00.000.000/0001-00"
+                    // Two-way binding
+                    value={cnpj} 
+                    onChange={(e) => setCnpj(e.target.value)}
                   />
                 </div>
 
@@ -60,13 +92,22 @@ const SolicitarParceria = () => {
                     id="nomeEmpresaInput"
                     className="form-control form-control-lg rounded-3 bg-light border-0 shadow-sm text-secondary fw-semibold p-3"
                     placeholder="Digite o nome fantasia"
+                    // Two-way binding
+                    value={nomeEmpresa}
+                    onChange={(e) => setNomeEmpresa(e.target.value)}
                   />
                 </div>
 
                 {/* Botão de Ação */}
                 <div className="d-grid">
-                  <button type="submit" className="btn btn-primary btn-lg rounded-pill fw-bold shadow py-3 fs-5">
-                    Solicitar 🚀
+                  <button 
+                    type="submit" 
+                    className="btn btn-primary btn-lg rounded-pill fw-bold shadow py-3 fs-5"
+                    disabled={loading} // Desabilita enquanto carrega
+                  >
+                    {loading ? (
+                        <span><span className="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Enviando...</span>
+                    ) : 'Solicitar 🚀'}
                   </button>
                 </div>
               </form>
@@ -75,8 +116,6 @@ const SolicitarParceria = () => {
           </div>
         </div>
       </div>
-
-
 
       {/* --- MODAL (OVERLAY) --- */}
       {exibirModal && (
