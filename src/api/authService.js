@@ -2,26 +2,44 @@
 import api from './axiosConfig';
 
 /**
- * Envia as credenciais para obter o token JWT.
- * Endpoint no Backend: POST /sessao (AuthController)
- * @param {string} login (email ou cpf)
- * @param {string} senha
+ * Endpoint no Backend: POST /auth/login (AuthController)
+ * DTO Java: LoginDTO { email, senha }
  */
 export const loginRequest = async (login, senha) => {
     try {
-        const response = await api.post('/sessao', { 
-            login, 
+        // O backend espera 'email', não 'login'
+        const response = await api.post('/auth/login', { 
+            email: login, 
             senha 
         });
-        return response.data; // Retorna o SessaoResponseDTO (token + dados user)
+        return response.data; // Retorna SessaoResponseDTO direto
     } catch (error) {
         throw error;
     }
 };
 
-export const logoutRequest = () => {
-    // Se o backend tiver um endpoint de logout (blacklist de token), chame aqui.
-    // Caso contrário, apenas limpamos o local no frontend (feito no Context).
-    localStorage.removeItem('token');
+export const createUsuarioComum = async (dadosPessoa) => {
+    // Backend: UsuarioComumController -> /usuarios-comuns/save
+    const response = await api.post('/usuarios-comuns/save', dadosPessoa);
+    return response.data; 
+};
+
+export const createUsuario = async (dadosUsuario) => {
+    // Backend: UsuarioController -> /usuarios/save
+    const response = await api.post('/usuarios/save', dadosUsuario);
+    return response.data;
+};
+
+export const logoutRequest = async () => {
+    // É boa prática chamar o logout no back para invalidar a sessão
+    try {
+        await api.post('/auth/logout');
+    } catch (e) {
+        console.error("Erro ao fazer logout no servidor", e);
+    }
     localStorage.removeItem('user');
+};
+
+export const getCurrentUser = () => {
+  return JSON.parse(localStorage.getItem('user'));
 };

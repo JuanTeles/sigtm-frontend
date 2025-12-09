@@ -1,7 +1,6 @@
 // src/contexts/AuthContext.js
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { loginRequest } from '../api/authService';
-import api from '../api/axiosConfig';
+import { loginRequest, logoutRequest } from '../api/authService';
 
 const AuthContext = createContext({});
 
@@ -9,16 +8,13 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Ao iniciar a app, verifica se já existe token salvo
     useEffect(() => {
         const recoverUser = () => {
-            const storedToken = localStorage.getItem('token');
+            // Não recuperamos token, pois é via Cookie (Sessão)
             const storedUser = localStorage.getItem('user');
 
-            if (storedToken && storedUser) {
+            if (storedUser) {
                 setUser(JSON.parse(storedUser));
-                // Define o token padrão para o axios, caso a app seja recarregada
-                api.defaults.headers.Authorization = `Bearer ${storedToken}`;
             }
             setLoading(false);
         };
@@ -30,25 +26,24 @@ export const AuthProvider = ({ children }) => {
         try {
             const data = await loginRequest(login, senha);
             
-            // O Backend retorna SessaoResponseDTO: { token: "...", usuario: {...} }
-            const { token, usuarioResumoDto } = data; // Ajuste o nome 'usuarioResumoDto' conforme o JSON exato do backend
-
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(usuarioResumoDto));
+            // O Backend retorna o objeto SessaoResponseDTO diretamente:
+            // { id, email, nome, tipoUsuario, logado: true }
             
-            api.defaults.headers.Authorization = `Bearer ${token}`;
-            setUser(usuarioResumoDto);
+            // Não existe 'token' na resposta do seu backend atual.
+            // Salvamos apenas os dados do usuário para uso visual.
+            localStorage.setItem('user', JSON.stringify(data));
+            
+            setUser(data);
             return { success: true };
         } catch (error) {
             console.error("Erro no login", error);
-            return { success: false, message: error.response?.data?.message || "Erro ao realizar login" };
+            const msg = error.response?.data?.message || "Erro ao realizar login";
+            return { success: false, message: msg };
         }
     };
 
-    const signOut = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        api.defaults.headers.Authorization = undefined;
+    const signOut = async () => {
+        await logoutRequest();
         setUser(null);
     };
 
@@ -59,7 +54,6 @@ export const AuthProvider = ({ children }) => {
     );
 };
 
-// Hook personalizado para usar o contexto mais facilmente
 export const useAuth = () => {
     const context = useContext(AuthContext);
     return context;

@@ -1,0 +1,42 @@
+/* src/css/Login.css */
+
+.login-wrapper {
+  background-color: #7d7d7d;
+  min-height: 80vh; /* Garante que ocupe boa parte da tela entre header e footer */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+  width: 100%;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+}
+
+.form-label-custom {
+  font-weight: bold;
+  color: #6c757d; /* text-secondary do Bootstrap */
+  font-size: 0.875em; /* small */
+}
+
+.btn-custom-dark {
+  background-color: #212529;
+  border-radius: 4px;
+  color: white;
+}
+
+.btn-custom-dark:hover {
+  background-color: #000000;
+  color: white;
+}
+
+.error-message {
+  color: #dc3545; /* Vermelho padrão de erro */
+  text-align: center;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}

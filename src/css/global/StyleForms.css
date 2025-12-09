@@ -1,0 +1,43 @@
+/* ... (Mantenha o conteúdo existente do arquivo) ... */
+
+/* --- ESTILOS DE FORMULÁRIO COMPARTILHADOS --- */
+
+/* O cartão cinza de fundo (#e5e7eb) */
+.form-card-gray {
+  background-color: #e5e7eb;
+  padding: 3rem; /* Equivalente a p-4 p-md-5 */
+  border-radius: 0.375rem; /* rounded */
+  box-shadow: 0 .125rem .25rem rgba(0,0,0,.075); /* shadow-sm */
+}
+
+/* Inputs sem borda e com padding maior */
+.form-control-clean {
+  border: 0 !important;
+  padding: 1rem !important; /* p-3 */
+}
+
+/* Botão Azul Pílula (Estilo do botão 'Cadastrar') */
+.btn-pill-blue {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 50rem; /* rounded-pill */
+  padding: 0.5rem 3rem; /* px-5 py-2 */
+  font-weight: 700; /* fw-bold */
+  box-shadow: 0 .5rem 1rem rgba(0,0,0,.15); /* shadow */
+  min-width: 160px;
+  transition: background 0.3s;
+}
+
+.btn-pill-blue:hover {
+  background-color: #2563eb; /* Azul um pouco mais escuro */
+  color: white;
+}
+
+/* Labels */
+.form-label-bold {
+  font-weight: bold;
+  color: #6c757d; /* text-secondary */
+  font-size: 0.875em; /* small */
+  text-transform: uppercase;
+}
