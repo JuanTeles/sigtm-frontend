@@ -1,0 +1,189 @@
+/* src/css/Evento.css */
+
+.page-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.header-section h1 {
+  font-size: 24px;
+  color: #333;
+  margin: 0;
+}
+
+.btn-novo {
+  background-color: #28a745; /* Verde sucesso */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.btn-novo:hover {
+  background-color: #218838;
+}
+
+.content-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow: hidden; /* Garante que a tabela não vaze bordas */
+}
+
+/* Tabela Customizada */
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.custom-table th {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  font-weight: 600;
+  padding: 16px;
+  border-bottom: 2px solid #dee2e6;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+.custom-table td {
+  padding: 16px;
+  border-bottom: 1px solid #dee2e6;
+  color: #495057;
+  vertical-align: middle;
+}
+
+.custom-table tr:last-child td {
+  border-bottom: none;
+}
+
+.custom-table tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* Estilos Específicos das Células */
+.cell-nome {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.icon-loc {
+  color: #007bff; /* Azul primário */
+  display: flex;
+  align-items: center;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-action {
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+}
+
+.btn-edit {
+  background-color: #ffc107; /* Amarelo */
+  color: #212529;
+}
+
+.btn-delete {
+  background-color: #dc3545; /* Vermelho */
+  color: white;
+}
+
+.btn-action:hover {
+  opacity: 0.8;
+}
+
+/* Controle de Largura das Colunas (Responsividade) */
+.col-nome { width: 35%; }
+.col-data { width: 20%; }
+.col-local { width: 30%; }
+.col-acoes { width: 15%; }
+
+/* Adicionar em src/css/Evento.css se faltar estilo no form */
+
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 15px;
+}
+
+.input-group label {
+  font-weight: 500;
+  color: #333;
+}
+
+.input-group input, 
+.input-group textarea {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.row-group {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.btn-save {
+  background-color: #28a745;
+  color: white;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-cancel {
+  background-color: #6c757d;
+  color: white;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}

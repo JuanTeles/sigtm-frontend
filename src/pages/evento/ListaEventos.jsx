@@ -1,71 +1,124 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Edit, Trash2, Plus, Calendar } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getEventos, deleteEvento } from '../../api/eventoService'; 
+import { FaCalendarAlt, FaPen, FaTrash, FaPlus } from 'react-icons/fa';
 
-const ListaEventos = () => {
-  // Futuramente, isso virá da sua API Java
-  const eventos = [
-    { id: 1, nome: "São João de Irecê 2025", data: "20/06/2025", local: "Praça Clériston Andrade", status: "Confirmado" },
-    { id: 2, nome: "Desfile de Carroças", data: "06/06/2025", local: "Centro", status: "Pendente" },
-    { id: 3, nome: "São Pedro da Boa Vista", data: "29/06/2025", local: "Bairro Boa Vista", status: "Confirmado" },
-  ];
+// MUDANÇA: Importando o CSS específico de Evento para corrigir bugs visuais
+import '../../css/Evento.css'; 
+
+function ListaEventos() {
+  const navigate = useNavigate();
+  
+  const [eventos, setEventos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const carregarEventos = async () => {
+      try {
+        setLoading(true);
+        const data = await getEventos();
+        setEventos(data);
+      } catch (err) {
+        console.error("Erro ao carregar eventos:", err);
+        setError('Não foi possível carregar a lista de eventos.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    carregarEventos();
+  }, []);
+
+  const handleNovoEvento = () => {
+    navigate('/eventos/novo');
+  };
+
+  const handleEditarEvento = (id) => {
+    navigate(`/eventos/editar/${id}`);
+  };
+
+  const handleDelete = async (id) => {
+    const confirmacao = window.confirm("Deseja realmente excluir este evento?");
+    
+    if (confirmacao) {
+      try {
+        await deleteEvento(id);
+        setEventos(listaAtual => listaAtual.filter(evento => evento.id !== id));
+        alert("Evento excluído com sucesso!");
+      } catch (err) {
+        console.error("Erro ao excluir:", err);
+        alert("Erro ao excluir o evento. Tente novamente.");
+      }
+    }
+  };
+
+  if (loading) return <div className="page-container"><p>Carregando eventos...</p></div>;
+  if (error) return <div className="page-container"><p style={{ color: 'red' }}>{error}</p></div>;
 
   return (
-    <div className="container py-5">
-      
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="fw-bold mb-0">EVENTOS</h1>
-        <Link 
-          to="/cadastro-evento" 
-          className="btn text-white fw-bold rounded-pill px-4 py-2 d-flex align-items-center gap-2 shadow-sm"
-          style={{ backgroundColor: '#3b82f6' }}
-        >
-          <Plus size={20} /> Novo Evento
-        </Link>
+    <div className="page-container">
+      <div className="header-section">
+        <h1>Eventos</h1>
+        
+        <button className="btn-novo" onClick={handleNovoEvento}>
+          <FaPlus /> Novo Evento
+        </button>
       </div>
 
-      <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
-        <div className="table-responsive">
-          <table className="table table-hover mb-0 align-middle">
-            <thead className="bg-light">
+      <div className="content-card">
+        {eventos.length === 0 ? (
+          <p style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+            Nenhum evento cadastrado.
+          </p>
+        ) : (
+          <table className="custom-table">
+            <thead>
+              {/* Adicionei classes nas TH para travar a largura das colunas */}
               <tr>
-                <th className="py-3 ps-4 text-secondary small text-uppercase">Evento</th>
-                <th className="py-3 text-secondary small text-uppercase">Data</th>
-                <th className="py-3 text-secondary small text-uppercase">Local</th>
-                <th className="py-3 text-secondary small text-uppercase">Status</th>
-                <th className="py-3 text-end pe-4 text-secondary small text-uppercase">Ações</th>
+                <th className="col-nome">EVENTO</th>
+                <th className="col-data">DATA / HORÁRIO</th>
+                <th className="col-local">LOCAL</th>
+                <th className="col-acoes">AÇÕES</th>
               </tr>
             </thead>
             <tbody>
               {eventos.map((evento) => (
                 <tr key={evento.id}>
-                  <td className="ps-4 py-3 fw-bold text-dark">
-                    <div className="d-flex align-items-center gap-2">
-                      <div className="bg-warning bg-opacity-10 text-warning p-2 rounded-circle" style={{ color: '#d97706' }}>
-                        <Calendar size={18} />
-                      </div>
+                  <td>
+                    <div className="cell-nome">
+                      <span className="icon-loc"><FaCalendarAlt size={16} /></span>
                       {evento.nome}
                     </div>
                   </td>
-                  <td className="text-secondary">{evento.data}</td>
-                  <td className="text-secondary">{evento.local}</td>
                   <td>
-                    <span className={`badge rounded-pill fw-normal px-3 py-2 ${evento.status === 'Confirmado' ? 'bg-success bg-opacity-10 text-success' : 'bg-warning bg-opacity-10 text-warning'}`}>
-                      {evento.status}
-                    </span>
+                    {/* Exibe a data e o horário em blocos separados */}
+                    <div style={{ fontWeight: '500' }}>{evento.data || 'Data n/d'}</div>
+                    <div style={{ fontSize: '0.85em', color: '#666', marginTop: '4px' }}>
+                        {evento.horario || ''}
+                    </div>
                   </td>
-                  <td className="text-end pe-4">
-                    <div className="d-flex justify-content-end gap-2">
-                      <Link 
-                        to="/editar-evento" 
-                        className="btn btn-sm btn-outline-primary border-0 bg-primary bg-opacity-10 text-primary rounded-circle p-2"
-                      >
-                        <Edit size={18} />
-                      </Link>
+                  <td>
+                    {evento.endereco 
+                      ? `${evento.endereco.cidade} - ${evento.endereco.estado}`
+                      : (evento.local || 'Local não informado')}
+                  </td>
+                  <td>
+                    <div className="actions">
                       <button 
-                        className="btn btn-sm btn-outline-danger border-0 bg-danger bg-opacity-10 text-danger rounded-circle p-2"
+                        className="btn-action btn-edit" 
+                        title="Editar"
+                        onClick={() => handleEditarEvento(evento.id)}
                       >
-                        <Trash2 size={18} />
+                        <FaPen size={12} />
+                      </button>
+                      
+                      <button 
+                        className="btn-action btn-delete" 
+                        title="Excluir"
+                        onClick={() => handleDelete(evento.id)}
+                      >
+                        <FaTrash size={12} />
                       </button>
                     </div>
                   </td>
@@ -73,10 +126,10 @@ const ListaEventos = () => {
               ))}
             </tbody>
           </table>
-        </div>
+        )}
       </div>
     </div>
   );
-};
+}
 
 export default ListaEventos;

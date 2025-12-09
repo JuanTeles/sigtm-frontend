@@ -140,70 +140,7 @@ const Home = () => {
                     </div>
                 </div>
 
-            </div>
 
-            {/* --- SEÇÃO: AGENDA SÃO JOÃO --- */}
-            <div className="w-100 py-5" style={{ backgroundColor: '#fbbf24' }}>
-                <div className="container">
-                    
-                    {/* Header da Agenda - Atualizado para JUNHO */}
-                    <div className="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 text-dark gap-3">
-                        <button className="btn btn-dark rounded-pill px-4 py-2 d-flex align-items-center gap-2 shadow-sm" style={{ backgroundColor: '#333' }}>
-                            Selecionar Data <Calendar size={18} />
-                        </button>
-                        
-                        <div className="d-flex align-items-center gap-3">
-                            <h2 className="fw-bold mb-0 text-dark">Junho</h2>
-                            {/* Datas dos dias principais da festa */}
-                            <div className="d-flex align-items-baseline gap-2 fs-3 opacity-50 fw-bold">
-                                <span>21</span>
-                                <span>22</span>
-                                <span>23</span>
-                                <span>24</span>
-                                <span>25</span>
-                                <ArrowRightCircle size={24} className="text-dark" />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Cards de Eventos (Sem fotos) */}
-                    <div className="row g-4">
-                        {eventos.map((evento) => (
-                            <div key={evento.id} className="col-md-4">
-                                <div className="card h-100 border-0 rounded-4 shadow-sm">
-                                    <div className="card-body p-4 d-flex flex-column">
-                                        <div className="d-flex align-items-center gap-2 text-secondary mb-2 small fw-bold">
-                                            <Calendar size={16} /> {evento.data}
-                                        </div>
-                                        <h5 className="card-title fw-bold mb-2">{evento.titulo}</h5>
-                                        <p className="card-text text-secondary small flex-grow-1">{evento.descricao}</p>
-                                        
-                                        <a href="#" className="text-info fw-bold text-decoration-none d-flex align-items-center gap-2 mt-3" style={{ color: '#0099ff' }}>
-                                            <ArrowRightCircle size={20} /> Saiba mais
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Footer da Agenda */}
-                    <div className="d-flex justify-content-between align-items-center mt-5">
-                        <button className="btn btn-dark rounded-pill px-4 py-2 fw-bold" style={{ backgroundColor: '#333' }}>
-                            Agenda Completa
-                        </button>
-                        
-                        <div className="d-flex gap-2">
-                            <button className="btn btn-outline-dark border-0 bg-white bg-opacity-25 rounded px-3 py-2">
-                                <ChevronLeft size={24} />
-                            </button>
-                            <button className="btn btn-outline-dark border-0 bg-white bg-opacity-25 rounded px-3 py-2">
-                                <ChevronRight size={24} />
-                            </button>
-                        </div>
-                    </div>
-
-                </div>
             </div>
 
         </div>
