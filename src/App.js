@@ -3,6 +3,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/authContext';
 
+
 // Componentes Globais
 import Header from './components/Header'; // Assumindo que quer o Header em todas as rotas
 import Footer from './components/Footer'; // Assumindo que quer o Footer em todas as rotas
