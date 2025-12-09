@@ -1,41 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // Adicione useEffect
 import 'bootstrap/dist/css/bootstrap.min.css';
-// 1. Importamos o service que criamos no passo anterior
 import { createSolicitacao } from '../api/SolicitacaoService';
+// IMPORTANTE: Importe o authService para pegar o usuário real
+import { getCurrentUser } from '../api/authService'; 
 
 const SolicitarParceria = () => {
 
   const [exibirModal, setExibirModal] = useState(false);
-
   const [cnpj, setCnpj] = useState('');
   const [nomeEmpresa, setNomeEmpresa] = useState('');
-
+  const [usuarioId, setUsuarioId] = useState(null); // Estado para o ID
   const [loading, setLoading] = useState(false);
+
+  // Pega o ID assim que a tela abre
+  useEffect(() => {
+    const user = getCurrentUser();
+    if (user && user.id) {
+        setUsuarioId(user.id);
+    } else {
+        alert("Você precisa estar logado para solicitar parceria.");
+        window.location.href = '/login';
+    }
+  }, []);
 
   const handleSolicitar = async (e) => {
     e.preventDefault(); 
     setLoading(true); 
 
-    const usuarioIdFixo = 1; 
+    if (!usuarioId) {
+        alert("Erro: Usuário não identificado.");
+        setLoading(false);
+        return;
+    }
     
     const dadosParaEnvio = {
       cnpj: cnpj,
         nomeEmpresa: nomeEmpresa, 
-        usuarioId: usuarioIdFixo
+        usuarioId: usuarioId // Usa o ID dinâmico
     };
 
     try {
-
         await createSolicitacao(dadosParaEnvio);
-
         setExibirModal(true);
-        
         setCnpj('');
         setNomeEmpresa('');
-
     } catch (error) {
         console.error("Erro ao solicitar:", error);
-        alert("Erro ao enviar a solicitação. Verifique se o Backend está rodando.");
+        // Mensagem de erro mais amigável
+        const msg = error.response?.data?.message || "Erro ao enviar solicitação.";
+        alert(msg);
     } finally {
         setLoading(false); 
     }
