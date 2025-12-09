@@ -2,8 +2,6 @@
 
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-
-// IMPORTANTE: Verifique se o caminho do import está correto baseado na sua estrutura de pastas
 import { createPontoTuristico } from '../../api/pontoTuristicoService'; 
 
 const CadastroPontoTuristico = () => {
@@ -53,7 +51,7 @@ const CadastroPontoTuristico = () => {
           numero: formData.numero,
           bairro: formData.bairro,
           cidade: formData.cidade,
-          uf: formData.estado
+          estado: formData.estado
         }
       };
 

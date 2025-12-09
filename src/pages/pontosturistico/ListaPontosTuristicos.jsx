@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'; // <--- 1. Importe isso
 import { getPontosTuristicos } from '../../api/pontoTuristicoService';
 import { FaMapMarkerAlt, FaPen, FaTrash, FaPlus } from 'react-icons/fa';
-import '../../css/PontosTuristicos.css';
+import '../../css/PontoTuristico.css';
 
 function ListaPontosTuristicos() {
   const navigate = useNavigate(); // <--- 2. Inicialize o hook de navegação
