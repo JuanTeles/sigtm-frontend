@@ -2,8 +2,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/authContext"; 
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
+import Swal from 'sweetalert2';
 
 // Importa o CSS criado acima
 import "../../css/Login.css"; 
@@ -24,11 +23,37 @@ const Login = () => {
     e.preventDefault();
     setErro(""); 
 
+    // Feedback visual de "Carregando"
+    Swal.fire({
+      title: 'Aguarde...',
+      text: 'Validando suas credenciais',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
     const resultado = await signIn(email, senha);
 
     if (resultado.success) {
-      navigate("/"); 
+      // Confirmação de Sucesso
+      Swal.fire({
+        icon: 'success',
+        title: 'Bem-vindo!',
+        text: 'Login realizado com sucesso.',
+        timer: 1500,
+        showConfirmButton: false
+      }).then(() => {
+        navigate("/"); 
+      });
     } else {
+      // Confirmação de Erro
+      Swal.fire({
+        icon: 'error',
+        title: 'Falha no Login',
+        text: resultado.message || 'Verifique seu e-mail e senha.',
+        confirmButtonColor: '#212529' // Cor do seu botão dark
+      });
       setErro(resultado.message);
     }
   };

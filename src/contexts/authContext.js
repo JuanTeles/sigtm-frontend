@@ -37,6 +37,7 @@ export const AuthProvider = ({ children }) => {
             return { success: true };
         } catch (error) {
             console.error("Erro no login", error);
+            localStorage.removeItem('user'); // Garante que não haverá usuário fantasma
             const msg = error.response?.data?.message || "Erro ao realizar login";
             return { success: false, message: msg };
         }
