@@ -2,17 +2,23 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-// 1. Adicionada a importação de deletePontoTuristico
 import { getPontosTuristicos, deletePontoTuristico } from '../../api/pontoTuristicoService';
-import { FaMapMarkerAlt, FaPen, FaTrash, FaPlus } from 'react-icons/fa';
-import '../../css/PontoTuristico.css';
+import { useAuth } from '../../contexts/authContext';
+import { FaMapMarkerAlt, FaPen, FaTrash, FaPlus, FaEye, FaTimes } from 'react-icons/fa';
+import '../../css/PontoTuristico.css'; // Importando o CSS atualizado
 
 function ListaPontosTuristicos() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   const [pontos, setPontos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Estado para controlar o Modal
+  const [modalAberto, setModalAberto] = useState(false);
+  // Agora armazena o objeto completo do ponto turístico
+  const [pontoSelecionado, setPontoSelecionado] = useState(null);
 
   useEffect(() => {
     const buscarPontos = async () => {
@@ -31,34 +37,40 @@ function ListaPontosTuristicos() {
     buscarPontos();
   }, []);
 
-  // Função para navegar para a tela de cadastro
-  const handleNovoPonto = () => {
-    navigate('/pontos-turisticos/novo');
-  };
+  const handleNovoPonto = () => navigate('/pontos-turisticos/novo');
+  const handleEditarPonto = (id) => navigate(`/pontos-turisticos/editar/${id}`);
 
-  // Função para navegar para a edição
-  const handleEditarPonto = (id) => {
-    navigate(`/pontos-turisticos/editar/${id}`);
-  };
-
-  // 2. Nova lógica para remover o ponto turístico
   const handleDelete = async (id) => {
-    const confirmacao = window.confirm("Tem certeza que deseja excluir este ponto turístico?");
-    
-    if (confirmacao) {
+    if (window.confirm("Tem certeza que deseja excluir este ponto turístico?")) {
       try {
         await deletePontoTuristico(id);
-        // Atualiza o estado removendo o item excluído sem precisar recarregar a tela
-        setPontos(pontosAtual => pontosAtual.filter(ponto => ponto.id !== id));
+        setPontos(pontos.filter(p => p.id !== id));
         alert("Ponto turístico removido com sucesso!");
       } catch (err) {
-        console.error("Erro ao deletar ponto:", err);
-        alert("Erro ao excluir o ponto turístico. Tente novamente.");
+        alert("Erro ao excluir. Tente novamente.");
       }
     }
   };
 
-  if (loading) return <div className="page-container"><p>Carregando dados...</p></div>;
+  const handleVerDetalhes = (ponto) => {
+    setPontoSelecionado(ponto);
+    setModalAberto(true);
+  };
+
+  const fecharModal = () => {
+    setModalAberto(false);
+    setPontoSelecionado(null);
+  };
+
+  const isGestor = user?.tipoUsuario?.toLowerCase() === 'gestor';
+
+  // Helper para formatar endereço (caso não venha formatado do back)
+  const formatarEndereco = (end) => {
+    if (!end) return 'Endereço não informado';
+    return `${end.rua || 'Rua não informada'}, ${end.numero || 'S/N'} - ${end.bairro || ''}, ${end.cidade || ''}/${end.estado || ''}`;
+  };
+
+  if (loading) return <div className="page-container"><p>Carregando...</p></div>;
   if (error) return <div className="page-container"><p style={{ color: 'red' }}>Erro: {error}</p></div>;
 
   return (
@@ -66,14 +78,16 @@ function ListaPontosTuristicos() {
       <div className="header-section">
         <h1>Pontos Turísticos</h1>
         
-        <button className="btn-novo" onClick={handleNovoPonto}>
-          <FaPlus /> Novo Ponto
-        </button>
+        {isGestor && (
+          <button className="btn-novo" onClick={handleNovoPonto}>
+            <FaPlus /> Novo Ponto
+          </button>
+        )}
       </div>
 
       <div className="content-card">
         {pontos.length === 0 ? (
-          <p style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+          <p className="empty-msg" style={{textAlign: 'center', padding: '20px', color: '#666'}}>
             Nenhum ponto turístico cadastrado.
           </p>
         ) : (
@@ -83,7 +97,7 @@ function ListaPontosTuristicos() {
                 <th>NOME</th>
                 <th>LOCALIZAÇÃO</th>
                 <th>BAIRRO</th>
-                <th>AÇÕES</th>
+                <th>{isGestor ? 'AÇÕES' : 'DETALHES'}</th>
               </tr>
             </thead>
             <tbody>
@@ -91,36 +105,45 @@ function ListaPontosTuristicos() {
                 <tr key={ponto.id}>
                   <td>
                     <div className="cell-nome">
-                      <span className="icon-loc"><FaMapMarkerAlt size={16} /></span>
+                      <FaMapMarkerAlt className="icon-loc" />
                       {ponto.nome}
                     </div>
                   </td>
                   <td>
                     {ponto.endereco 
                       ? `${ponto.endereco.cidade} - ${ponto.endereco.estado}`
-                      : 'Endereço não informado'}
+                      : 'Endereço n/d'}
                   </td>
-                  <td>
-                    {ponto.endereco?.bairro || '-'}
-                  </td>
+                  <td>{ponto.endereco?.bairro || '-'}</td>
                   <td>
                     <div className="actions">
-                      <button 
-                        className="btn-action btn-edit" 
-                        title="Editar"
-                        onClick={() => handleEditarPonto(ponto.id)}
-                      >
-                        <FaPen size={12} />
-                      </button>
-                      
-                      {/* 3. Evento onClick adicionado ao botão de excluir */}
-                      <button 
-                        className="btn-action btn-delete" 
-                        title="Excluir"
-                        onClick={() => handleDelete(ponto.id)}
-                      >
-                        <FaTrash size={12} />
-                      </button>
+                      {isGestor ? (
+                        <>
+                          <button 
+                            className="btn-action btn-edit" 
+                            title="Editar"
+                            onClick={() => handleEditarPonto(ponto.id)}
+                          >
+                            <FaPen />
+                          </button>
+                          <button 
+                            className="btn-action btn-delete" 
+                            title="Excluir"
+                            onClick={() => handleDelete(ponto.id)}
+                          >
+                            <FaTrash />
+                          </button>
+                        </>
+                      ) : (
+                        <button 
+                          className="btn-action" 
+                          title="Ver Detalhes"
+                          style={{ backgroundColor: '#17a2b8', color: '#fff', border: 'none' }}
+                          onClick={() => handleVerDetalhes(ponto)}
+                        >
+                          <FaEye />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -129,6 +152,73 @@ function ListaPontosTuristicos() {
           </table>
         )}
       </div>
+
+      {/* MODAL COMPLETO */}
+      {modalAberto && pontoSelecionado && (
+        <div className="modal-overlay">
+          <div className="modal-content-custom">
+            
+            <div className="modal-header">
+              <h3>{pontoSelecionado.nome}</h3>
+              <button onClick={fecharModal} className="modal-close-btn">
+                <FaTimes />
+              </button>
+            </div>
+            
+            <div className="modal-body">
+              
+              <div className="detail-item">
+                <span className="detail-label">Descrição</span>
+                <span className="detail-value">
+                  {pontoSelecionado.descricao || "Nenhuma descrição informada."}
+                </span>
+              </div>
+
+              <div className="detail-item">
+                <span className="detail-label">Endereço Completo</span>
+                <span className="detail-value">
+                  {formatarEndereco(pontoSelecionado.endereco)}
+                </span>
+              </div>
+
+              <div className="detail-item" style={{ display: 'flex', gap: '20px' }}>
+                <div>
+                  <span className="detail-label">Abertura</span>
+                  <span className="detail-value">{pontoSelecionado.horarioAbertura || '-'}</span>
+                </div>
+                <div>
+                  <span className="detail-label">Fechamento</span>
+                  <span className="detail-value">{pontoSelecionado.horarioFechamento || '-'}</span>
+                </div>
+              </div>
+
+              <div className="detail-item">
+                <span className="detail-label">Nível de Acessibilidade</span>
+                <span className="detail-value">
+                  {pontoSelecionado.nivelAcessibilidade 
+                    ? `Nível ${pontoSelecionado.nivelAcessibilidade}` 
+                    : 'Não informado'}
+                </span>
+              </div>
+
+              {pontoSelecionado.nomeGestorResponsavel && (
+                <div className="detail-item">
+                  <span className="detail-label">Responsável</span>
+                  <span className="detail-value">{pontoSelecionado.nomeGestorResponsavel}</span>
+                </div>
+              )}
+
+            </div>
+            
+            <div className="modal-footer">
+              <button onClick={fecharModal} className="btn-modal-close">
+                Fechar
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 }
