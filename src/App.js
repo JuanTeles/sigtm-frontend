@@ -11,7 +11,6 @@
   // Páginas Gerais
   import Home from './pages/Home';
   import Parceiros from './pages/Parceiros';
-  import Reserva from './pages/Reserva';
   import SolicitarParceria from './pages/SolicitarParceria';
 
   // Páginas de Usuário
@@ -41,6 +40,10 @@
   import ListarPromocoes from './pages/promocao/ListarPromocoes';
 
 
+  // Páginas de reserva
+  import ListaReservas from './pages/reserva/ListaReservas';
+  import Reserva from './pages/Reserva';
+
   function App() {
     return (
       <BrowserRouter>
@@ -60,6 +63,7 @@
               
               {/* --- Rotas de Funcionalidades --- */}
               <Route path="/reservas" element={<Reserva />} />
+              <Route path="/lista-reservas" element={<ListaReservas />} />
               
               {/* --- Pontos Turísticos --- */}
               <Route path="/pontos-turisticos" element={<ListaPontosTuristicos />} />

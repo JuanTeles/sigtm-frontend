@@ -17,7 +17,10 @@ export const salvarReserva = async (reservaDTO) => {
 // Listar todas as reservas (se precisar futuramente)
 export const listarReservas = async () => {
     try {
-        const response = await api.get(`${BASE_URL}/findall`);
+        // Adicionamos o objeto de configuração como segundo parâmetro do get (ou terceiro do post)
+        const response = await api.get(`${BASE_URL}/findall`, {
+            withCredentials: true // <--- Força o envio do cookie nesta requisição
+        });
         return response.data;
     } catch (error) {
         throw error;

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { ListCheck, Calendar, GeoAlt, CheckCircle, XCircle } from 'react-bootstrap-icons';
+// Adicionei 'JournalText' aos imports de ícones
+import { ListCheck, Calendar, GeoAlt, CheckCircle, XCircle, JournalText } from 'react-bootstrap-icons';
 import { salvarReserva, listarPontosParaReserva, listarEventosParaReserva } from '../api/reservaService';
 import { useNavigate } from 'react-router-dom';
 
@@ -89,7 +90,8 @@ const TelaReservaModerna = () => {
       <div className="flex-grow-1 d-flex align-items-center justify-content-center py-5">
         <div className="container">
           <div className="row justify-content-center">
-            <div className="col-12 col-md-8 col-lg-6">
+            <div className="col-12 col-md-10 col-lg-8"> 
+              {/* Aumentei um pouco a largura da coluna pai para caber 3 botões melhor */}
               
               <div className="card border-0 shadow-lg rounded-4 p-4 p-md-5">
                 
@@ -106,29 +108,46 @@ const TelaReservaModerna = () => {
                 )}
 
                 <form>
-                  {/* --- BOTÕES DE NAVEGAÇÃO (Alterado) --- */}
-                  {/* Eles agora usam navigate() para ir para outras páginas */}
+                  {/* --- BOTÕES DE NAVEGAÇÃO (Alterado para 3 colunas) --- */}
                   <div className="row g-3 mb-4">
-                    <div className="col-sm-6">
+                    
+                    {/* Botão 1: Pontos */}
+                    <div className="col-md-4">
                       <button 
                         type="button" 
                         onClick={() => navigate('/pontos-turisticos')} 
                         className="btn btn-primary w-100 py-3 rounded-4 d-flex flex-column align-items-center justify-content-center shadow-sm h-100 border-0 bg-gradient"
                       >
                         <ListCheck size={24} className="mb-2" />
-                        <span className="fw-bold">Ver Pontos Turísticos</span>
-                        <small className="opacity-75" style={{fontSize: '0.75rem'}}>Ir para lista completa</small>
+                        <span className="fw-bold">Pontos Turísticos</span>
+                        <small className="opacity-75" style={{fontSize: '0.7rem'}}>Ver lista</small>
                       </button>
                     </div>
-                    <div className="col-sm-6">
+
+                    {/* Botão 2 (NOVO): Ver Reservas (CENTRO) */}
+                    <div className="col-md-4">
+                      <button 
+                        type="button" 
+                        onClick={() => navigate('/lista-reservas')} // Rota sugerida
+                        className="btn btn-info w-100 py-3 rounded-4 d-flex flex-column align-items-center justify-content-center shadow-sm h-100 border-0 bg-gradient text-white"
+                        style={{ backgroundColor: '#0dcaf0' }}
+                      >
+                        <JournalText size={24} className="mb-2" />
+                        <span className="fw-bold">Minhas Reservas</span>
+                        <small className="opacity-75" style={{fontSize: '0.7rem'}}>Consultar histórico</small>
+                      </button>
+                    </div>
+
+                    {/* Botão 3: Eventos */}
+                    <div className="col-md-4">
                       <button 
                         type="button" 
                         onClick={() => navigate('/eventos')}
                         className="btn btn-warning w-100 py-3 rounded-4 d-flex flex-column align-items-center justify-content-center shadow-sm h-100 text-dark border-0 bg-gradient"
                       >
                         <Calendar size={24} className="mb-2" />
-                        <span className="fw-bold">Ver Agenda de Eventos</span>
-                        <small className="opacity-75" style={{fontSize: '0.75rem'}}>Ir para lista completa</small>
+                        <span className="fw-bold">Agenda de Eventos</span>
+                        <small className="opacity-75" style={{fontSize: '0.7rem'}}>Ver lista</small>
                       </button>
                     </div>
                   </div>
@@ -171,7 +190,7 @@ const TelaReservaModerna = () => {
                     </div>
                   </div>
 
-                  {/* Select Dinâmico (Muda baseado no Radio Button acima) */}
+                  {/* Select Dinâmico */}
                   <div className="mb-3">
                     <label className="form-label text-muted fw-bold text-uppercase small">
                       {tipoReserva === 'PONTO' ? 'Qual Ponto Turístico?' : 'Qual Evento?'}
