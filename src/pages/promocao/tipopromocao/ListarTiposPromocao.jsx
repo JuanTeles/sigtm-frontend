@@ -1,109 +1,140 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import axios from 'axios';
+import { useAuth } from '../../../contexts/authContext';
 
 const ListarTiposPromocao = () => {
-  const [tipos, setTipos] = useState([
-    { id: 1, titulo: "Desconto Sazonal", descricao: "Aplicada em épocas específicas do ano." },
-    { id: 2, titulo: "Oferta Especial", descricao: "Promoções de curto prazo para atrair clientes." },
-  ]);
+  const { user } = useAuth();
 
+  const [tipos, setTipos] = useState([]);
   const [showModalExcluir, setShowModalExcluir] = useState(false);
   const [itemSelecionado, setItemSelecionado] = useState(null);
+
+  // 🔐 Verifica perfil
+  const tipoUsuario = user?.tipoUsuario?.toLowerCase();
+  const podeGerenciar =
+    tipoUsuario === 'gestor' || tipoUsuario === 'parceiro';
+
+  const carregarDados = () => {
+    axios
+      .get('http://localhost:8080/tipos-promocao/findall')
+      .then(res => setTipos(res.data))
+      .catch(() => alert('Erro ao carregar tipos.'));
+  };
+
+  useEffect(() => {
+    carregarDados();
+  }, []);
 
   const handleExcluir = (item) => {
     setItemSelecionado(item);
     setShowModalExcluir(true);
   };
 
-  const confirmExcluir = () => {
-    setTipos(tipos.filter(t => t.id !== itemSelecionado.id));
+  const confirmExcluir = async () => {
+    await axios.delete(
+      `http://localhost:8080/tipos-promocao/delete/${itemSelecionado.id}`
+    );
     setShowModalExcluir(false);
-    alert("Tipo de promoção excluído.");
+    carregarDados();
   };
 
   return (
-    <div className="min-vh-100 bg-light py-5 font-sans">
+    <div className="min-vh-100 bg-light py-5">
       <div className="container">
 
         <div className="d-flex justify-content-between align-items-center mb-4">
           <div>
             <h2 className="fw-bold text-primary m-0">Tipos de Promoção</h2>
-            <p className="text-muted small m-0">Gerencie os tipos cadastrados.</p>
+            <p className="text-muted small m-0">
+              Gerencie os tipos cadastrados.
+            </p>
           </div>
 
-          <Link to="/Promocoes" className="btn btn-primary rounded-pill fw-bold px-4 shadow">
-            + Promoções
-          </Link>
+          {/* BOTÃO NOVO TIPO */}
+          {podeGerenciar && (
+            <Link
+              to="/tipos-promocao/novo"
+              className="btn btn-primary rounded-pill fw-bold px-4 shadow"
+            >
+              + Novo Tipo
+            </Link>
+          )}
         </div>
 
         <div className="card border-0 shadow-lg rounded-4 overflow-hidden">
-
-          {/* Busca */}
-          <div className="card-header bg-white border-0 p-4 d-flex flex-column flex-md-row gap-3 justify-content-between align-items-center">
-            <div className="input-group" style={{ maxWidth: '400px' }}>
-              <span className="input-group-text bg-light border-0 ps-3 rounded-start-4 text-muted">🔍</span>
-              <input className="form-control bg-light border-0 py-2 rounded-end-4 text-secondary fw-semibold"
-                     placeholder="Buscar por título..." />
-            </div>
-
-            <button className="btn btn-light text-primary rounded-circle p-2 shadow-sm">🔄</button>
-          </div>
-
-          {/* Tabela */}
           <div className="table-responsive">
             <table className="table table-hover align-middle mb-0">
               <thead className="bg-light">
                 <tr>
-                  <th className="py-3 ps-4 text-uppercase text-muted small fw-bold border-0">Título</th>
-                  <th className="py-3 text-uppercase text-muted small fw-bold border-0">Descrição</th>
-                  <th className="py-3 text-end pe-4 text-uppercase text-muted small fw-bold border-0">Ações</th>
+                  <th className="ps-4">Título</th>
+                  <th>Descrição</th>
+                  {podeGerenciar && (
+                    <th className="text-end pe-4">Ações</th>
+                  )}
                 </tr>
               </thead>
+
               <tbody>
                 {tipos.map(item => (
                   <tr key={item.id}>
                     <td className="fw-bold ps-4">{item.titulo}</td>
-                    <td className="text-secondary">{item.descricao}</td>
-                    <td className="text-end pe-4">
-                      <div className="d-flex justify-content-end gap-2">
-                        <Link to={`/tipos-promocao/editar/:id${item.id}`} className="btn btn-outline-primary btn-sm border-0 px-3">
+                    <td>{item.descricao}</td>
+
+                    {/* BOTÕES EDITAR / EXCLUIR */}
+                    {podeGerenciar && (
+                      <td className="text-end pe-4">
+                        <Link
+                          to={`/tipos-promocao/editar/${item.id}`}
+                          className="btn btn-outline-primary btn-sm me-2"
+                        >
                           ✎ Editar
                         </Link>
-                        <button onClick={() => handleExcluir(item)} className="btn btn-outline-danger btn-sm border-0 px-2">
+
+                        <button
+                          onClick={() => handleExcluir(item)}
+                          className="btn btn-outline-danger btn-sm"
+                        >
                           ❌
                         </button>
-                      </div>
-                    </td>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
-            </table>
-          </div>
 
-          <div className="card-footer bg-white border-0 py-3 d-flex justify-content-between align-items-center px-4">
-            <small className="text-muted fw-bold">Mostrando {tipos.length} registros</small>
+            </table>
           </div>
         </div>
       </div>
 
-      {/* Modal */}
+      {/* MODAL DE EXCLUSÃO */}
       {showModalExcluir && (
-        <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
-             style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="bg-white p-4 rounded-4 shadow-lg text-center m-3" style={{ maxWidth: "380px" }}>
-            <div className="mb-3 text-danger" style={{ fontSize: "3rem" }}>🗑️</div>
+        <div
+          className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+        >
+          <div className="bg-white p-4 rounded-4 text-center">
             <h4 className="fw-bold">Excluir Tipo?</h4>
-            <p className="text-muted">
-              Confirmar exclusão de <strong>{itemSelecionado?.titulo}</strong>?
+            <p>
+              Confirmar exclusão de{' '}
+              <strong>{itemSelecionado?.titulo}</strong>?
             </p>
 
             <div className="d-flex justify-content-center gap-2">
-              <button className="btn btn-light rounded-pill px-4 fw-bold"
-                      onClick={() => setShowModalExcluir(false)}>Cancelar</button>
+              <button
+                className="btn btn-light"
+                onClick={() => setShowModalExcluir(false)}
+              >
+                Cancelar
+              </button>
 
-              <button className="btn btn-danger rounded-pill px-4 fw-bold shadow-sm"
-                      onClick={confirmExcluir}>Excluir</button>
+              <button
+                className="btn btn-danger"
+                onClick={confirmExcluir}
+              >
+                Excluir
+              </button>
             </div>
           </div>
         </div>
