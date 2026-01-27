@@ -1,152 +1,157 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import axios from 'axios';
+import { useAuth } from '../../contexts/authContext';
 
 const ListarPromocoes = () => {
-  const [promocoes, setPromocoes] = useState([
-    {
-      id: 1,
-      titulo: "Black Friday Irecê",
-      tipo: "Desconto Sazonal",
-      dataInicio: "20/11/2025",
-      dataFim: "25/11/2025",
-      status: "Ativa"
-    },
-    {
-      id: 2,
-      titulo: "Festival de Verão",
-      tipo: "Oferta Especial",
-      dataInicio: "01/12/2025",
-      dataFim: "15/12/2025",
-      status: "Agendada"
-    },
-  ]);
+  const { user } = useAuth();
+  const [promocoes, setPromocoes] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const [showModalExcluir, setShowModalExcluir] = useState(false);
-  const [itemSelecionado, setItemSelecionado] = useState(null);
+  const podeGerenciar =
+    user?.tipoUsuario?.toLowerCase() === 'gestor' ||
+    user?.tipoUsuario?.toLowerCase() === 'parceiro';
 
-  const handleClickExcluir = (item) => {
-    setItemSelecionado(item);
-    setShowModalExcluir(true);
+  // 🔹 Formata data ISO -> dd/MM/yyyy
+  const formatarData = (data) => {
+    if (!data) return '-';
+    const d = new Date(data);
+    return d.toLocaleDateString('pt-BR');
   };
 
-  const handleConfirmarExclusao = () => {
-    setPromocoes(promocoes.filter(p => p.id !== itemSelecionado.id));
-    setShowModalExcluir(false);
-    alert("Promoção removida com sucesso.");
+  const carregarPromocoes = async () => {
+    try {
+      const response = await axios.get(
+        'http://localhost:8080/promocoes/findall'
+      );
+      setPromocoes(response.data);
+    } catch (error) {
+      alert('Erro ao carregar promoções.');
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    carregarPromocoes();
+  }, []);
+
+  const excluirPromocao = async (id) => {
+    if (!window.confirm('Deseja realmente excluir esta promoção?')) return;
+
+    try {
+      await axios.delete(`http://localhost:8080/promocoes/delete/${id}`);
+      carregarPromocoes();
+    } catch (error) {
+      alert('Erro ao excluir promoção.');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="container py-5 text-center">
+        <p>Carregando promoções...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-vh-100 bg-light py-5 font-sans">
+    <div className="min-vh-100 bg-light py-5">
       <div className="container">
 
-        {/* Cabeçalho */}
+        {/* TOPO */}
         <div className="d-flex justify-content-between align-items-center mb-4">
           <div>
             <h2 className="fw-bold text-primary m-0">Promoções</h2>
-            <p className="text-muted small m-0">Gerencie as promoções cadastradas.</p>
+            <p className="text-muted small m-0">
+              Lista de promoções cadastradas
+            </p>
           </div>
 
-          <Link to="/tipos-promocao" className="btn btn-primary rounded-pill fw-bold px-4 shadow">
-            + Tipos de promoção
-          </Link>
+          {podeGerenciar && (
+            <div className="d-flex gap-2">
+              <Link
+                to="/tipos-promocao"
+                className="btn btn-outline-primary rounded-pill fw-bold px-4"
+              >
+                Tipos de Promoção
+              </Link>
+
+              <Link
+                to="/promocoes/nova"
+                className="btn btn-primary rounded-pill fw-bold px-4"
+              >
+                + Nova Promoção
+              </Link>
+            </div>
+          )}
         </div>
 
-        {/* CARD */}
-        <div className="card border-0 shadow-lg rounded-4 overflow-hidden">
-
-          {/* Busca */}
-          <div className="card-header bg-white border-0 p-4 d-flex flex-column flex-md-row gap-3 justify-content-between align-items-center">
-            <div className="input-group" style={{ maxWidth: '400px' }}>
-              <span className="input-group-text bg-light border-0 ps-3 rounded-start-4 text-muted">
-                🔍
-              </span>
-              <input 
-                type="text"
-                className="form-control bg-light border-0 py-2 rounded-end-4 text-secondary fw-semibold"
-                placeholder="Buscar por título ou tipo..."
-              />
-            </div>
-
-            <button className="btn btn-light text-primary rounded-circle p-2 shadow-sm" title="Atualizar">
-              🔄
-            </button>
-          </div>
-
-          {/* Tabela */}
+        {/* TABELA */}
+        <div className="card border-0 shadow rounded-4 overflow-hidden">
           <div className="table-responsive">
             <table className="table table-hover align-middle mb-0">
               <thead className="bg-light">
                 <tr>
-                  <th className="py-3 ps-4 text-uppercase text-muted small fw-bold border-0">Título</th>
-                  <th className="py-3 text-uppercase text-muted small fw-bold border-0">Tipo</th>
-                  <th className="py-3 text-uppercase text-muted small fw-bold border-0">Início</th>
-                  <th className="py-3 text-uppercase text-muted small fw-bold border-0">Término</th>
-                  <th className="py-3 text-uppercase text-muted small fw-bold border-0">Status</th>
-                  <th className="py-3 text-end pe-4 text-uppercase text-muted small fw-bold border-0">Ações</th>
+                  <th className="ps-4">Título</th>
+                  <th>Tipo</th>
+                  <th>Início</th>
+                  <th>Término</th>
+                  <th>Descrição</th>
+                  <th>Regras</th>
+                  {podeGerenciar && (
+                    <th className="text-end pe-4">Ações</th>
+                  )}
                 </tr>
               </thead>
+
               <tbody>
-                {promocoes.map(item => (
-                  <tr key={item.id}>
-                    <td className="ps-4 fw-bold">{item.titulo}</td>
-                    <td className="text-secondary fw-semibold">{item.tipo}</td>
-                    <td>{item.dataInicio}</td>
-                    <td>{item.dataFim}</td>
-                    <td>
-                      <span className="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3">
-                        {item.status}
-                      </span>
-                    </td>
-                    <td className="text-end pe-4">
-                      <div className="d-flex justify-content-end gap-2">
-                        <Link to={`/promocoes/editar/:id${item.id}`} className="btn btn-outline-primary btn-sm rounded-3 border-0 px-3 fw-bold">
-                          ✎ Editar
-                        </Link>
-                        <button
-                          onClick={() => handleClickExcluir(item)}
-                          className="btn btn-outline-danger btn-sm rounded-3 border-0 px-2"
-                        >
-                          ❌
-                        </button>
-                      </div>
+                {promocoes.length === 0 ? (
+                  <tr>
+                    <td colSpan={podeGerenciar ? 7 : 6} className="text-center py-4">
+                      Nenhuma promoção cadastrada.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  promocoes.map((item) => (
+                    <tr key={item.id}>
+                      <td className="fw-bold ps-4">{item.titulo}</td>
+                      <td>{item.tituloTipoPromocao || '-'}</td>
+                      <td>{formatarData(item.dataInicio)}</td>
+                      <td>{formatarData(item.dataTermino)}</td>
+                      <td className="text-truncate" style={{ maxWidth: 200 }}>
+                        {item.descricao}
+                      </td>
+                      <td className="text-truncate" style={{ maxWidth: 200 }}>
+                        {item.regras}
+                      </td>
+
+                      {podeGerenciar && (
+                        <td className="text-end pe-4">
+                          <Link
+                            to={`/promocoes/editar/${item.id}`}
+                            className="btn btn-outline-primary btn-sm me-2"
+                          >
+                            ✎ Editar
+                          </Link>
+
+                          <button
+                            onClick={() => excluirPromocao(item.id)}
+                            className="btn btn-outline-danger btn-sm"
+                          >
+                            ❌
+                          </button>
+                        </td>
+                      )}
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
-
-          {/* Rodapé */}
-          <div className="card-footer bg-white border-0 py-3 d-flex justify-content-between align-items-center px-4">
-            <small className="text-muted fw-bold">Mostrando {promocoes.length} registros</small>
-          </div>
         </div>
+
       </div>
-
-      {/* MODAL EXCLUIR */}
-      {showModalExcluir && (
-        <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
-             style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
-          <div className="bg-white p-4 rounded-4 shadow-lg text-center m-3" style={{ maxWidth: '380px' }}>
-            <div className="mb-3 text-danger" style={{ fontSize: '3rem' }}>🗑️</div>
-            <h4 className="fw-bold text-dark mb-2">Excluir Promoção?</h4>
-            <p className="text-muted mb-4">
-              Deseja realmente excluir <strong>{itemSelecionado?.titulo}</strong>?
-            </p>
-
-            <div className="d-flex justify-content-center gap-2">
-              <button onClick={() => setShowModalExcluir(false)} className="btn btn-light rounded-pill px-4 fw-bold">
-                Cancelar
-              </button>
-              <button onClick={handleConfirmarExclusao} className="btn btn-danger rounded-pill px-4 fw-bold shadow-sm">
-                Confirmar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
     </div>
   );
 };

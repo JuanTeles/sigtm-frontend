@@ -1,68 +1,199 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import axios from 'axios';
+import { useAuth } from '../../contexts/authContext';
 
 const EditarPromocao = () => {
+  const { id } = useParams();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const [tiposPromocao, setTiposPromocao] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const [form, setForm] = useState({
+    titulo: '',
+    descricao: '',
+    regras: '',
+    dataInicio: '',
+    dataTermino: '',
+    tipoPromocaoId: ''
+  });
+
+  const podeGerenciar =
+    user?.tipoUsuario?.toLowerCase() === 'gestor' ||
+    user?.tipoUsuario?.toLowerCase() === 'parceiro';
+
+  useEffect(() => {
+    const carregarDados = async () => {
+      try {
+        const [promocaoRes, tiposRes] = await Promise.all([
+          axios.get(`http://localhost:8080/promocoes/find/${id}`),
+          axios.get('http://localhost:8080/tipos-promocao/findall')
+        ]);
+
+        const p = promocaoRes.data;
+
+        setForm({
+          titulo: p.titulo || '',
+          descricao: p.descricao || '',
+          regras: p.regras || '',
+          dataInicio: p.dataInicio?.split('T')[0] || '',
+          dataTermino: p.dataTermino?.split('T')[0] || '',
+          tipoPromocaoId: p.tipoPromocaoId || ''
+        });
+
+        setTiposPromocao(tiposRes.data);
+      } catch (error) {
+        alert('Erro ao carregar dados da promoção.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    carregarDados();
+  }, [id]);
+
+  if (!podeGerenciar) {
+    return (
+      <div className="container py-5 text-center">
+        <h4 className="text-danger fw-bold">Acesso restrito</h4>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return <p className="text-center mt-5">Carregando...</p>;
+  }
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const payload = {
+      ...form,
+      tipoPromocaoId: Number(form.tipoPromocaoId)
+    };
+
+    try {
+      await axios.put(
+        `http://localhost:8080/promocoes/update/${id}`,
+        payload
+      );
+      alert('Promoção atualizada com sucesso!');
+      navigate('/promocoes');
+    } catch (error) {
+      alert('Erro ao atualizar promoção.');
+    }
+  };
+
   return (
     <div className="container py-5">
       <h1 className="fw-bold mb-4">EDITAR PROMOÇÃO</h1>
 
       <div className="p-4 p-md-5 rounded shadow-sm" style={{ backgroundColor: '#e5e7eb' }}>
-        <form>
-          {/* Linha 1 */}
+        <form onSubmit={handleSubmit}>
+
+          {/* LINHA 1 */}
           <div className="row g-3 mb-3">
             <div className="col-md-6">
-              <label className="form-label fw-bold text-secondary small">TÍTULO:</label>
-              <input type="text" className="form-control p-3 border-0" defaultValue="Black Friday Irecê" />
+              <label className="form-label fw-bold small">TÍTULO</label>
+              <input
+                type="text"
+                name="titulo"
+                className="form-control p-3 border-0"
+                value={form.titulo}
+                onChange={handleChange}
+                required
+              />
             </div>
+
             <div className="col-md-6">
-              <label className="form-label fw-bold text-secondary small">TIPO DE PROMOÇÃO:</label>
-              <input type="text" className="form-control p-3 border-0" defaultValue="Desconto Sazonal" />
+              <label className="form-label fw-bold small">TIPO DE PROMOÇÃO</label>
+              <select
+                name="tipoPromocaoId"
+                className="form-select p-3 border-0"
+                value={form.tipoPromocaoId}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Selecione um tipo</option>
+                {tiposPromocao.map(tipo => (
+                  <option key={tipo.id} value={tipo.id}>
+                    {tipo.titulo}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
-          {/* Linha 2 */}
+          {/* LINHA 2 */}
           <div className="row g-3 mb-3">
             <div className="col-md-6">
-              <label className="form-label fw-bold text-secondary small">DESCRIÇÃO</label>
-              <textarea 
-                className="form-control border-0 p-3" 
-                rows="5" 
-                style={{ resize: 'none' }} 
-                defaultValue="Super descontos em todas as lojas do centro."
-              ></textarea>
+              <label className="form-label fw-bold small">DESCRIÇÃO</label>
+              <textarea
+                name="descricao"
+                className="form-control p-3 border-0"
+                rows="5"
+                value={form.descricao}
+                onChange={handleChange}
+                required
+              />
             </div>
+
             <div className="col-md-6">
-              <label className="form-label fw-bold text-secondary small">REGRAS:</label>
-              <textarea 
-                className="form-control border-0 p-3" 
-                rows="5" 
-                style={{ resize: 'none' }} 
-                defaultValue="Não acumulativo com outras promoções."
-              ></textarea>
+              <label className="form-label fw-bold small">REGRAS</label>
+              <textarea
+                name="regras"
+                className="form-control p-3 border-0"
+                rows="5"
+                value={form.regras}
+                onChange={handleChange}
+                required
+              />
             </div>
           </div>
 
-          {/* Linha 3 */}
+          {/* LINHA 3 */}
           <div className="row g-3 mb-5">
             <div className="col-md-3">
-              <label className="form-label fw-bold text-secondary small">DATA DE INÍCIO:</label>
-              <input type="date" className="form-control p-3 border-0 text-secondary" defaultValue="2025-11-20" />
+              <label className="form-label fw-bold small">DATA INÍCIO</label>
+              <input
+                type="date"
+                name="dataInicio"
+                className="form-control p-3 border-0"
+                value={form.dataInicio}
+                onChange={handleChange}
+                required
+              />
             </div>
+
             <div className="col-md-3">
-              <label className="form-label fw-bold text-secondary small">DATA DE TÉRMINO:</label>
-              <input type="date" className="form-control p-3 border-0 text-secondary" defaultValue="2025-11-25" />
+              <label className="form-label fw-bold small">DATA TÉRMINO</label>
+              <input
+                type="date"
+                name="dataTermino"
+                className="form-control p-3 border-0"
+                value={form.dataTermino}
+                onChange={handleChange}
+                required
+              />
             </div>
           </div>
 
-          {/* Botões */}
+          {/* BOTÕES */}
           <div className="d-flex justify-content-center gap-3">
-            <Link to="/paineladm" className="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow border-0" style={{ backgroundColor: '#3b82f6', minWidth: '160px' }}>
+            <Link to="/promocoes" className="btn btn-secondary px-5 rounded-pill">
               CANCELAR
             </Link>
-            <button type="submit" className="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow border-0" style={{ backgroundColor: '#3b82f6', minWidth: '160px' }}>
-              ATUALIZAR
+            <button type="submit" className="btn btn-primary px-5 rounded-pill">
+              SALVAR
             </button>
           </div>
+
         </form>
       </div>
     </div>
