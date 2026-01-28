@@ -52,3 +52,8 @@ export const buscarEventoPorNome = async (nome) => {
     });
     return response.data;
 };
+
+export const getEventosFuturos = async () => {
+    const response = await api.get('/eventos/futuros');
+    return response.data;
+};

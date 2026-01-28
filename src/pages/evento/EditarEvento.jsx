@@ -10,7 +10,7 @@ const EditarEvento = () => {
   
   // 1. Estados para guardar os IDs dos relacionamentos
   const [enderecoId, setEnderecoId] = useState(null); 
-  const [parceiroId, setParceiroId] = useState(null); // <--- NOVO: ID do Parceiro
+  const [parceiroId, setParceiroId] = useState(null); 
 
   useEffect(() => {
     const carregarEvento = async () => {
@@ -82,7 +82,6 @@ const EditarEvento = () => {
             
             // O Backend espera um objeto 'endereco' com os dados, não apenas o ID solto
             endereco: {
-                id: enderecoId, 
                 rua: formData.rua,
                 numero: formData.numero,
                 bairro: formData.bairro,

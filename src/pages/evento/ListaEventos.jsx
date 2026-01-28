@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getEventos, deleteEvento } from '../../api/eventoService'; 
-import { FaCalendarAlt, FaPen, FaTrash, FaPlus } from 'react-icons/fa';
-
-// MUDANÇA: Importando o CSS específico de Evento para corrigir bugs visuais
+import { getEventos, deleteEvento, getEventosFuturos } from '../../api/eventoService'; 
+import { FaCalendarAlt, FaPen, FaTrash, FaPlus } from 'react-icons/fa'; 
 import '../../css/Evento.css'; 
 
 function ListaEventos() {
@@ -13,11 +11,23 @@ function ListaEventos() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // NOVO STATE: Controla o filtro (false = todos, true = apenas futuros)
+  const [mostrarFuturos, setMostrarFuturos] = useState(true);
+
   useEffect(() => {
     const carregarEventos = async () => {
       try {
         setLoading(true);
-        const data = await getEventos();
+        
+        // LÓGICA DO FILTRO: Escolhe qual serviço chamar
+        let data;
+        if (mostrarFuturos) {
+            data = await getEventosFuturos();
+        } else {
+            data = await getEventos();
+        }
+
+        console.log(`Dados recebidos (Futuros: ${mostrarFuturos}):`, data);
         setEventos(data);
       } catch (err) {
         console.error("Erro ao carregar eventos:", err);
@@ -28,7 +38,7 @@ function ListaEventos() {
     };
 
     carregarEventos();
-  }, []);
+  }, [mostrarFuturos]); 
 
   const handleNovoEvento = () => {
     navigate('/eventos/novo');
@@ -53,6 +63,25 @@ function ListaEventos() {
     }
   };
 
+  // --- FUNÇÕES DE FORMATAÇÃO ---
+  const formatarData = (dataString) => {
+    if (!dataString) return 'Data n/d';
+    const partes = dataString.split('-');
+    if (partes.length === 3) {
+        return `${partes[2]}/${partes[1]}/${partes[0]}`;
+    }
+    return dataString;
+  };
+
+  const formatarHora = (horaIso) => {
+    if (!horaIso) return ''; 
+    if (horaIso.includes('T')) {
+        const tempo = horaIso.split('T')[1];
+        return tempo.substring(0, 5); 
+    }
+    return horaIso;
+  };
+
   if (loading) return <div className="page-container"><p>Carregando eventos...</p></div>;
   if (error) return <div className="page-container"><p style={{ color: 'red' }}>{error}</p></div>;
 
@@ -61,20 +90,46 @@ function ListaEventos() {
       <div className="header-section">
         <h1>Eventos</h1>
         
-        <button className="btn-novo" onClick={handleNovoEvento}>
-          <FaPlus /> Novo Evento
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            {/* --- CHECKBOX DE FILTRO --- */}
+            <label style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '8px', 
+                cursor: 'pointer',
+                backgroundColor: '#fff',
+                padding: '8px 12px',
+                borderRadius: '8px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+                fontSize: '0.9rem',
+                fontWeight: '500',
+                color: '#555'
+            }}>
+                <input 
+                    type="checkbox" 
+                    checked={mostrarFuturos} 
+                    onChange={(e) => setMostrarFuturos(e.target.checked)} 
+                    style={{ cursor: 'pointer' }}
+                />
+                Apenas Futuros
+            </label>
+
+            <button className="btn-novo" onClick={handleNovoEvento}>
+            <FaPlus /> Novo Evento
+            </button>
+        </div>
       </div>
 
       <div className="content-card">
         {eventos.length === 0 ? (
           <p style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
-            Nenhum evento cadastrado.
+            {mostrarFuturos 
+                ? "Nenhum evento futuro encontrado." 
+                : "Nenhum evento cadastrado."}
           </p>
         ) : (
           <table className="custom-table">
             <thead>
-              {/* Adicionei classes nas TH para travar a largura das colunas */}
               <tr>
                 <th className="col-nome">EVENTO</th>
                 <th className="col-data">DATA / HORÁRIO</th>
@@ -92,10 +147,11 @@ function ListaEventos() {
                     </div>
                   </td>
                   <td>
-                    {/* Exibe a data e o horário em blocos separados */}
-                    <div style={{ fontWeight: '500' }}>{evento.data || 'Data n/d'}</div>
+                    <div style={{ fontWeight: '500' }}>
+                        {formatarData(evento.data)}
+                    </div>
                     <div style={{ fontSize: '0.85em', color: '#666', marginTop: '4px' }}>
-                        {evento.horario || ''}
+                        {formatarHora(evento.hora)}
                     </div>
                   </td>
                   <td>
