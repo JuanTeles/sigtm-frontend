@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-// --- ALTERAÇÃO 1: Importamos a nova função de cancelar ---
 import { listarReservas, cancelarReserva } from '../../api/reservaService'; 
-import { CalendarEvent, GeoAlt, Trash, TicketDetailed, JournalBookmark } from 'react-bootstrap-icons';
+// --- ALTERAÇÃO 1: Adicionei 'MusicNoteBeamed' nos imports ---
+import { MusicNoteBeamed, GeoAlt, Trash, TicketDetailed, JournalBookmark } from 'react-bootstrap-icons';
 import { useNavigate } from 'react-router-dom';
 
 const ListaReservas = () => {
@@ -14,6 +14,7 @@ const ListaReservas = () => {
     const fetchReservas = async () => {
       try {
         const dados = await listarReservas(); 
+        console.log("Dados recebidos:", dados); 
         setReservas(dados);
       } catch (error) {
         console.error("Erro ao buscar reservas:", error);
@@ -26,46 +27,43 @@ const ListaReservas = () => {
     fetchReservas();
   }, []);
 
-  // --- ALTERAÇÃO 2: Função para lidar com o cancelamento ---
   const handleCancelar = async (id) => {
-    // 1. Confirmação simples
-    const confirmacao = window.confirm("Tem certeza que deseja cancelar esta reserva? Essa ação não pode ser desfeita.");
-    
+    const confirmacao = window.confirm("Tem certeza que deseja cancelar esta reserva?");
     if (confirmacao) {
       try {
-        // 2. Chama o backend
         await cancelarReserva(id);
-
-        // 3. Atualiza a lista visualmente (remove o item deletado do array)
         setReservas(listaAtual => listaAtual.filter(reserva => reserva.id !== id));
-        
         alert("Reserva cancelada com sucesso!");
       } catch (error) {
         console.error("Erro ao cancelar:", error);
-        // Tenta pegar a mensagem de erro do backend (ex: BusinessException) ou usa uma genérica
-        const msg = error.response?.data?.message || "Erro ao cancelar a reserva. Tente novamente.";
+        const msg = error.response?.data?.message || "Erro ao cancelar. Tente novamente.";
         alert(msg);
       }
     }
   };
 
   const getDetalhesItem = (reserva) => {
-    if (reserva.evento) {
+    const nome = reserva.nomeItem || 'Nome Indisponível';
+    const tipo = reserva.tipoItem; 
+
+    if (tipo === 'EVENTO') {
       return { 
-        nome: reserva.evento.nome, 
+        nome: nome, 
         tipo: 'Evento', 
-        icon: <CalendarEvent className="text-primary bg-light p-2 rounded-circle" size={40} /> 
+        // --- ALTERAÇÃO 2: Ícone trocado para Nota Musical ---
+        icon: <MusicNoteBeamed className="text-primary bg-light p-2 rounded-circle" size={40} /> 
       };
-    } else if (reserva.pontoTuristico) {
+    } else if (tipo === 'PONTO_TURISTICO') {
       return { 
-        nome: reserva.pontoTuristico.nome, 
+        nome: nome, 
         tipo: 'Ponto Turístico', 
         icon: <GeoAlt className="text-success bg-light p-2 rounded-circle" size={40} /> 
       };
     }
+    
     return { 
-      nome: 'Item desconhecido', 
-      tipo: '-', 
+      nome: nome, 
+      tipo: tipo || '-', 
       icon: <JournalBookmark className="text-secondary" size={40} /> 
     };
   };
@@ -76,7 +74,7 @@ const ListaReservas = () => {
         const date = new Date(dataArray[0], dataArray[1] - 1, dataArray[2]);
         return date.toLocaleDateString('pt-BR');
     }
-    return new Date(dataArray).toLocaleDateString('pt-BR');
+    return new Date(dataArray + 'T00:00:00').toLocaleDateString('pt-BR');
   };
 
   return (
@@ -143,12 +141,11 @@ const ListaReservas = () => {
                             </span>
                           </td>
                           <td className="text-end pe-4 py-3">
-                            {/* --- ALTERAÇÃO 3: Botão chamando a função real --- */}
                             <button 
                               className="btn btn-light text-danger btn-sm rounded-circle p-2 shadow-sm"
                               title="Cancelar Reserva"
                               onClick={(e) => {
-                                e.stopPropagation(); // Evita que o click na linha dispare outra ação
+                                e.stopPropagation();
                                 handleCancelar(reserva.id);
                               }}
                             >
