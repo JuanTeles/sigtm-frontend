@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-// --- CORREÇÃO AQUI: O nome deve ser EXATAMENTE igual ao do arquivo service ---
-import { listarReservas } from '../../api/reservaService'; 
+// --- ALTERAÇÃO 1: Importamos a nova função de cancelar ---
+import { listarReservas, cancelarReserva } from '../../api/reservaService'; 
 import { CalendarEvent, GeoAlt, Trash, TicketDetailed, JournalBookmark } from 'react-bootstrap-icons';
 import { useNavigate } from 'react-router-dom';
 
@@ -13,7 +13,6 @@ const ListaReservas = () => {
   useEffect(() => {
     const fetchReservas = async () => {
       try {
-        // --- CORREÇÃO AQUI TAMBÉM: Chamando a função com o nome certo ---
         const dados = await listarReservas(); 
         setReservas(dados);
       } catch (error) {
@@ -27,7 +26,29 @@ const ListaReservas = () => {
     fetchReservas();
   }, []);
 
-  // O restante do código permanece idêntico...
+  // --- ALTERAÇÃO 2: Função para lidar com o cancelamento ---
+  const handleCancelar = async (id) => {
+    // 1. Confirmação simples
+    const confirmacao = window.confirm("Tem certeza que deseja cancelar esta reserva? Essa ação não pode ser desfeita.");
+    
+    if (confirmacao) {
+      try {
+        // 2. Chama o backend
+        await cancelarReserva(id);
+
+        // 3. Atualiza a lista visualmente (remove o item deletado do array)
+        setReservas(listaAtual => listaAtual.filter(reserva => reserva.id !== id));
+        
+        alert("Reserva cancelada com sucesso!");
+      } catch (error) {
+        console.error("Erro ao cancelar:", error);
+        // Tenta pegar a mensagem de erro do backend (ex: BusinessException) ou usa uma genérica
+        const msg = error.response?.data?.message || "Erro ao cancelar a reserva. Tente novamente.";
+        alert(msg);
+      }
+    }
+  };
+
   const getDetalhesItem = (reserva) => {
     if (reserva.evento) {
       return { 
@@ -122,12 +143,13 @@ const ListaReservas = () => {
                             </span>
                           </td>
                           <td className="text-end pe-4 py-3">
+                            {/* --- ALTERAÇÃO 3: Botão chamando a função real --- */}
                             <button 
                               className="btn btn-light text-danger btn-sm rounded-circle p-2 shadow-sm"
                               title="Cancelar Reserva"
                               onClick={(e) => {
-                                e.stopPropagation();
-                                alert('Funcionalidade de cancelamento será implementada na próxima etapa.');
+                                e.stopPropagation(); // Evita que o click na linha dispare outra ação
+                                handleCancelar(reserva.id);
                               }}
                             >
                               <Trash size={18} />

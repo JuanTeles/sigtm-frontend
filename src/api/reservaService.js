@@ -37,3 +37,13 @@ export const listarEventosParaReserva = async () => {
     const response = await api.get('/eventos/findall');
     return response.data;
 };
+
+
+export const cancelarReserva = async (id) => {
+    try {
+        // O endpoint no seu Controller é /reservas/delete/{id}
+        await api.delete(`${BASE_URL}/delete/${id}`);
+    } catch (error) {
+        throw error;
+    }
+};
