@@ -80,9 +80,16 @@ const EditarEvento = () => {
             publicoAlvo: formData.publicoAlvo,
             categoria: formData.categoria,
             
-            // --- AQUI ESTÁ O PULO DO GATO ---
-            // Mande apenas os IDs puros, sem chaves {}
-            enderecoId: enderecoId, 
+            // O Backend espera um objeto 'endereco' com os dados, não apenas o ID solto
+            endereco: {
+                id: enderecoId, 
+                rua: formData.rua,
+                numero: formData.numero,
+                bairro: formData.bairro,
+                cidade: formData.cidade,
+                estado: formData.estado
+            },
+
             parceiroId: parceiroId
         };
 
