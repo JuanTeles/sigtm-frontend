@@ -40,7 +40,7 @@
 .content-card {
   background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   overflow: hidden; /* Garante que a tabela não vaze bordas */
 }
 
@@ -123,10 +123,18 @@
 }
 
 /* Controle de Largura das Colunas (Responsividade) */
-.col-nome { width: 35%; }
-.col-data { width: 20%; }
-.col-local { width: 30%; }
-.col-acoes { width: 15%; }
+.col-nome {
+  width: 35%;
+}
+.col-data {
+  width: 20%;
+}
+.col-local {
+  width: 30%;
+}
+.col-acoes {
+  width: 15%;
+}
 
 /* Adicionar em src/css/Evento.css se faltar estilo no form */
 
@@ -148,7 +156,7 @@
   color: #333;
 }
 
-.input-group input, 
+.input-group input,
 .input-group textarea {
   padding: 10px;
   border: 1px solid #ccc;
@@ -186,4 +194,57 @@
   border: none;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* Fundo escuro semi-transparente */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Garante que fique acima de tudo */
+}
+
+.modal-content-custom {
+  background: #fff;
+  padding: 0;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  position: relative;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.detail-item {
+  margin-bottom: 15px;
+}
+
+.detail-label {
+  display: block;
+  font-weight: bold;
+  color: #007bff;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  margin-bottom: 5px;
+}
+
+.detail-value {
+  color: #333;
+  font-size: 0.95rem;
 }
