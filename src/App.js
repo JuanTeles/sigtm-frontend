@@ -44,6 +44,9 @@
   import ListaReservas from './pages/reserva/ListaReservas';
   import Reserva from './pages/Reserva';
 
+  // Página de avaliação
+  import TelaAvaliacoes from './pages/avaliacoes/TelaAvaliacoes';
+
   function App() {
     return (
       <BrowserRouter>
@@ -87,6 +90,9 @@
               <Route path="/admin" element={<TelaPainelAdmin />} />
               <Route path="/admin/solicitacoes" element={<TelaListagemSolicitacoes />} />
 
+              {/* --- Avaliações --- */}
+              <Route path="/avaliacoes" element={<TelaAvaliacoes />} />
+              
               {/* Rota para lidar com URLs inexistentes (404) */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
@@ -97,5 +103,5 @@
       </BrowserRouter>
     );
   }
-
+  
   export default App;

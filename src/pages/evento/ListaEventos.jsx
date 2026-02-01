@@ -12,6 +12,7 @@ import {
   FaPlus,
   FaEye,
   FaTimes,
+  FaStar, // alterações jeff: adicionado ícone de estrela para avaliações
 } from "react-icons/fa"; //  adicionado FaTimes para o modal
 import { useAuth } from "../../contexts/authContext"; //  importação do contexto de autenticação
 import "../../css/Evento.css";
@@ -62,6 +63,11 @@ function ListaEventos() {
 
   const handleNovoEvento = () => {
     navigate("/eventos/novo");
+  };
+
+  // alterações jeff: Função para navegar até a tela de avaliações
+  const handleIrParaAvaliacoes = () => {
+    navigate("/avaliacoes");
   };
 
   const handleEditarEvento = (id) => {
@@ -140,6 +146,18 @@ function ListaEventos() {
         <h1>Eventos</h1>
 
         <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+          
+          {/* alterações jeff: Botão de Avaliações disponível para usuários logados */}
+          {user && (
+            <button 
+                className="btn-novo" 
+                onClick={handleIrParaAvaliacoes}
+                style={{ backgroundColor: '#f1c40f', border: 'none' }} // Amarelo conforme solicitado
+            >
+                <FaStar /> Avaliar
+            </button>
+          )}
+
           {/* --- CHECKBOX DE FILTRO --- */}
           <label
             style={{
