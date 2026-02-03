@@ -6,6 +6,7 @@ import {
   createSolicitacao,
   deleteSolicitacao
 } from '../api/SolicitacaoService';
+import { promoverUsuarioParaParceiro } from '../api/parceiroService';
 
 const TelaListagemSolicitacoes = () => {
   const [solicitacoes, setSolicitacoes] = useState([]);
@@ -39,15 +40,20 @@ const TelaListagemSolicitacoes = () => {
   const handleAprovar = async (item) => {
     if (!window.confirm(`Aprovar solicitação de ${item.empresa || item.nomeEmpresa || 'entidade'}?`)) return;
     try {
-      // Observação: o backend mostrado não possui endpoint de "aprovar" explícito.
-      // Por enquanto removemos a solicitação localmente (como se tivesse sido processada)
-      // e chamamos o DELETE para limpar a solicitação no servidor.
+      // Chama a rota do backend que promove usuário para parceiro
+      const usuarioId = item.usuarioId || item.usuario?.id;
+      if (!usuarioId) {
+        throw new Error('ID do usuário não encontrado na solicitação.');
+      }
+      await promoverUsuarioParaParceiro(usuarioId);
+      // Após promover, remove a solicitação
       await deleteSolicitacao(item.id);
       setSolicitacoes(prev => prev.filter(s => s.id !== item.id));
-      alert('Solicitação aprovada (processamento básico).');
+      alert('Solicitação aprovada e usuário promovido a parceiro.');
     } catch (err) {
-      console.error(err);
-      alert('Erro ao aprovar solicitação. Verifique o console.');
+      console.error('Erro ao aprovar solicitação:', err);
+      const msg = err?.response?.data?.message || err?.message || 'Erro ao aprovar solicitação.';
+      alert(msg);
     }
   };
 
@@ -131,7 +137,7 @@ const TelaListagemSolicitacoes = () => {
                     <td className="ps-4 py-3 border-bottom-0">
                       <div className="d-flex align-items-center">
                         <div className="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold me-3" style={{width: '40px', height: '40px'}}>
-                          {item.empresa.charAt(0)}
+                          {item.empresa?.charAt(0) || item.parceiro?.charAt(0) || item.nome?.charAt(0) || '-'}
                         </div>
                         <div>
                           <div className="fw-bold text-dark">{item.empresa}</div>

@@ -9,6 +9,7 @@ const SolicitarParceria = () => {
   const [exibirModal, setExibirModal] = useState(false);
   const [cnpj, setCnpj] = useState('');
   const [nomeEmpresa, setNomeEmpresa] = useState('');
+  const [horarioFuncionamento, setHorarioFuncionamento] = useState(''); // novo campo
   const [usuarioId, setUsuarioId] = useState(null); // Estado para o ID
   const [loading, setLoading] = useState(false);
 
@@ -36,7 +37,8 @@ const SolicitarParceria = () => {
     const dadosParaEnvio = {
       cnpj: cnpj,
         nomeEmpresa: nomeEmpresa, 
-        usuarioId: usuarioId // Usa o ID dinâmico
+      usuarioId: usuarioId, // Usa o ID dinâmico
+      horarioFuncionamento: horarioFuncionamento || null
     };
 
     try {
@@ -109,6 +111,20 @@ const SolicitarParceria = () => {
                     onChange={(e) => setNomeEmpresa(e.target.value)}
                   />
                 </div>
+
+                  {/* Campo Horário de Funcionamento (texto, ex: '18 as 20') */}
+                  <div className="mb-4">
+                    <label htmlFor="horarioInput" className="form-label text-muted fw-bold text-uppercase small ps-2">Horário de Funcionamento</label>
+                    <input
+                      required
+                      type="text"
+                      id="horarioInput"
+                      placeholder="Ex: 18 as 20"
+                      className="form-control form-control-lg rounded-3 bg-light border-0 shadow-sm text-secondary fw-semibold p-3"
+                      value={horarioFuncionamento}
+                      onChange={(e) => setHorarioFuncionamento(e.target.value)}
+                    />
+                  </div>
 
                 {/* Botão de Ação */}
                 <div className="d-grid">

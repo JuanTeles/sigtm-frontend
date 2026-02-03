@@ -1,45 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { getParceiros, saveParceiro, deleteParceiro, rebaixarParceiroParaUsuario } from '../api/parceiroService';
 
 const TelaListaParceiros = () => {
-  // 1. Dados simulados ajustados para conter os campos do novo DTO
-  // (Mantive 'segmento' e 'email' apenas para visualização na tabela, mas não são editáveis conforme seu DTO)
-  const [parceiros, setParceiros] = useState([
-    { 
-      id: 1, 
-      nome: "João Silva", // Nome do Responsável
-      nomeEmpresa: "Restaurante Sabor do Sertão Ltda", 
-      cnpj: "12.345.678/0001-90", 
-      segmento: "Gastronomia", 
-      email: "contato@sabordosertao.com", 
-      telefone: "(74) 99988-1234", 
-      horarioFuncionamento: "Seg a Sex, 08h às 22h",
-      status: "Ativo" 
-    },
-    { 
-      id: 2, 
-      nome: "Maria Oliveira",
-      nomeEmpresa: "Hotel Irecê Palace", 
-      cnpj: "98.765.432/0001-10", 
-      segmento: "Hospedagem", 
-      email: "reservas@irecepalace.com.br", 
-      telefone: "(74) 3641-5555", 
-      horarioFuncionamento: "24 horas",
-      status: "Ativo" 
-    },
-    { 
-      id: 3, 
-      nome: "Carlos Souza",
-      nomeEmpresa: "Agência de Turismo Sol e Terra", 
-      cnpj: "45.123.789/0001-55", 
-      segmento: "Turismo", 
-      email: "guias@soleterra.com", 
-      telefone: "(74) 98877-0000", 
-      horarioFuncionamento: "Seg a Sab, 08h às 18h",
-      status: "Bloqueado" 
-    }
-  ]);
+  const [parceiros, setParceiros] = useState([]);
 
   const [showModalEditar, setShowModalEditar] = useState(false);
   const [showModalExcluir, setShowModalExcluir] = useState(false);
@@ -53,6 +18,21 @@ const TelaListaParceiros = () => {
     telefone: '', 
     horarioFuncionamento: '' 
   });
+
+  // Carrega parceiros do backend
+  const loadParceiros = async () => {
+    try {
+      const data = await getParceiros();
+      setParceiros(data || []);
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao carregar parceiros. Verifique o console.');
+    }
+  };
+
+  useEffect(() => {
+    loadParceiros();
+  }, []);
 
   const handleAbrirEditar = (parceiro) => {
     setItemSelecionado(parceiro);
@@ -69,10 +49,23 @@ const TelaListaParceiros = () => {
 
   const handleSalvarEdicao = (e) => {
     e.preventDefault();
-    // Atualiza a lista local (Simulando o PUT no backend)
-    setParceiros(parceiros.map(p => p.id === itemSelecionado.id ? { ...p, ...formData } : p));
-    setShowModalEditar(false);
-    alert("Dados atualizados com sucesso!");
+    (async () => {
+      try {
+        const payload = {
+          ...(itemSelecionado || {}),
+          ...formData
+        };
+        await saveParceiro(payload);
+        await loadParceiros();
+        setShowModalEditar(false);
+        alert('Dados atualizados com sucesso!');
+      } catch (err) {
+        console.error(err);
+        // Exibir mensagem de erro vindo do backend se houver
+        const msg = err?.response?.data?.message || err?.message || 'Erro ao salvar parceiro. Verifique o console.';
+        alert(msg);
+      }
+    })();
   };
 
   const handleAbrirExcluir = (parceiro) => {
@@ -81,8 +74,19 @@ const TelaListaParceiros = () => {
   };
 
   const handleConfirmarExclusao = () => {
-    setParceiros(parceiros.filter(p => p.id !== itemSelecionado.id));
-    setShowModalExcluir(false);
+    (async () => {
+      try {
+        // Chama endpoint de rebaixar parceiro -> transforma em usuário comum
+        await rebaixarParceiroParaUsuario(itemSelecionado.id);
+        await loadParceiros();
+        setShowModalExcluir(false);
+        alert('Parceiro rebaixado para usuário comum com sucesso.');
+      } catch (err) {
+        console.error('Erro ao rebaixar parceiro:', err);
+        const msg = err?.response?.data?.message || 'Erro ao rebaixar parceiro. Verifique o console.';
+        alert(msg);
+      }
+    })();
   };
 
   return (
