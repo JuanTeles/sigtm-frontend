@@ -6,9 +6,9 @@ import api from './axiosConfig';
 export const getMinhasAvaliacoes = async () => {
     try {
         const response = await api.get('/avaliacoes/find/me');
-        return response.data; // List<AvaliacaoResponseDTO>
+        return response.data;
     } catch (error) {
-        console.error("Erro ao buscar minhas avaliações", error);
+        console.error("Erro ao buscar minhas avaliações:", error.response?.data || error.message);
         throw error;
     }
 };
@@ -21,6 +21,7 @@ export const saveAvaliacao = async (itemId, data, tipo) => {
         throw new Error("Parâmetros inválidos para salvar avaliação");
     }
 
+    // Define a rota com base na aba ativa ("pontos" ou "eventos")
     const rota =
         tipo === 'pontos'
             ? `/pontos-turisticos/${itemId}/avaliacoes/save`
@@ -33,8 +34,12 @@ export const saveAvaliacao = async (itemId, data, tipo) => {
         });
         return response.data;
     } catch (error) {
-        console.error("Erro ao salvar avaliação", error);
-        throw error;
+        // Log melhorado para mostrar a mensagem do Backend
+        const mensagemErro = error.response?.data?.message || error.response?.data || error.message;
+        console.error(`Erro ao salvar avaliação (${tipo}):`, mensagemErro);
+        
+        // Relança o erro com a mensagem tratada para o componente exibir no alert
+        throw new Error(typeof mensagemErro === 'string' ? mensagemErro : "Erro ao conectar com o servidor.");
     }
 };
 
@@ -53,7 +58,7 @@ export const updateAvaliacao = async (id, data) => {
         });
         return response.data;
     } catch (error) {
-        console.error("Erro ao atualizar avaliação", error);
+        console.error("Erro ao atualizar avaliação:", error.response?.data || error.message);
         throw error;
     }
 };

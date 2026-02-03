@@ -5,6 +5,7 @@ import {
   deleteEvento,
   getEventosFuturos,
 } from "../../api/eventoService";
+import { saveAvaliacao } from "../../api/avaliacaoService"; // [NOVO] Importação necessária
 import {
   FaCalendarAlt,
   FaPen,
@@ -12,42 +13,44 @@ import {
   FaPlus,
   FaEye,
   FaTimes,
-  FaStar, // alterações jeff: adicionado ícone de estrela para avaliações
-} from "react-icons/fa"; //  adicionado FaTimes para o modal
-import { useAuth } from "../../contexts/authContext"; //  importação do contexto de autenticação
+  FaStar, 
+} from "react-icons/fa";
+import { useAuth } from "../../contexts/authContext";
 import "../../css/Evento.css";
 
 function ListaEventos() {
   const navigate = useNavigate();
-  const { user } = useAuth(); //  obtendo dados do usuário logado
+  const { user } = useAuth(); 
 
   const [eventos, setEventos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // NOVO STATE: Controla o filtro (false = todos, true = apenas futuros)
+  // Filtro
   const [mostrarFuturos, setMostrarFuturos] = useState(true);
 
-  // Estados para controlar o Modal de Detalhes
+  // Estados para controlar o Modal de Detalhes (Visualização)
   const [modalAberto, setModalAberto] = useState(false);
   const [eventoSelecionado, setEventoSelecionado] = useState(null);
 
-  // definindo a permissão de gestor para uso no componente
+  // [NOVO] Estados para o Modal de Avaliação
+  const [modalAvaliacaoAberto, setModalAvaliacaoAberto] = useState(false);
+  const [eventoParaAvaliar, setEventoParaAvaliar] = useState(null);
+  const [dadosAvaliacao, setDadosAvaliacao] = useState({ estrelas: 5, descricao: "" });
+
+  // Permissão de gestor
   const isGestor = user?.tipoUsuario?.toLowerCase() === "gestor";
 
   useEffect(() => {
     const carregarEventos = async () => {
       try {
         setLoading(true);
-
-        // LÓGICA DO FILTRO: Escolhe qual serviço chamar
         let data;
         if (mostrarFuturos) {
           data = await getEventosFuturos();
         } else {
           data = await getEventos();
         }
-
         console.log(`Dados recebidos (Futuros: ${mostrarFuturos}):`, data);
         setEventos(data);
       } catch (err) {
@@ -65,7 +68,6 @@ function ListaEventos() {
     navigate("/eventos/novo");
   };
 
-  // alterações jeff: Função para navegar até a tela de avaliações
   const handleIrParaAvaliacoes = () => {
     navigate("/avaliacoes");
   };
@@ -76,7 +78,6 @@ function ListaEventos() {
 
   const handleDelete = async (id) => {
     const confirmacao = window.confirm("Deseja realmente excluir este evento?");
-
     if (confirmacao) {
       try {
         await deleteEvento(id);
@@ -91,7 +92,7 @@ function ListaEventos() {
     }
   };
 
-  // Funções para abrir e fechar o modal
+  // Funções para abrir e fechar o modal de Detalhes
   const handleVerDetalhes = (evento) => {
     setEventoSelecionado(evento);
     setModalAberto(true);
@@ -100,6 +101,30 @@ function ListaEventos() {
   const fecharModal = () => {
     setModalAberto(false);
     setEventoSelecionado(null);
+  };
+
+  // [NOVO] Funções para o Modal de Avaliação
+  const handleAbrirAvaliacao = (evento) => {
+    setEventoParaAvaliar(evento);
+    setDadosAvaliacao({ estrelas: 5, descricao: "" }); // Resetar formulário
+    setModalAvaliacaoAberto(true);
+  };
+
+  const handleSalvarAvaliacao = async () => {
+    if (!dadosAvaliacao.descricao.trim()) {
+      alert("Por favor, escreva uma descrição.");
+      return;
+    }
+
+    try {
+      // Chama a API passando 'eventos' como o tipo do item
+      await saveAvaliacao(eventoParaAvaliar.id, dadosAvaliacao, 'eventos');
+      alert("Avaliação registrada com sucesso!");
+      setModalAvaliacaoAberto(false);
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao salvar avaliação. Verifique se você já avaliou este evento.");
+    }
   };
 
   // --- FUNÇÕES DE FORMATAÇÃO ---
@@ -121,7 +146,6 @@ function ListaEventos() {
     return horaIso;
   };
 
-  // Helper para formatar endereço completo no modal
   const formatarEndereco = (end) => {
     if (!end) return "Endereço não informado";
     return `${end.rua || ""}, ${end.numero || "S/N"} - ${end.bairro || ""}, ${end.cidade || ""}/${end.estado || ""}`;
@@ -147,18 +171,19 @@ function ListaEventos() {
 
         <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
           
-          {/* alterações jeff: Botão de Avaliações disponível para usuários logados */}
+          {/* Botão para ver MINHAS avaliações (navegação) */}
           {user && (
             <button 
                 className="btn-novo" 
                 onClick={handleIrParaAvaliacoes}
-                style={{ backgroundColor: '#f1c40f', border: 'none' }} // Amarelo conforme solicitado
+                style={{ backgroundColor: '#f1c40f', border: 'none' }}
+                title="Minhas Avaliações"
             >
-                <FaStar /> Avaliar
+                <FaStar /> Minhas Avaliações
             </button>
           )}
 
-          {/* --- CHECKBOX DE FILTRO --- */}
+          {/* CHECKBOX DE FILTRO */}
           <label
             style={{
               display: "flex",
@@ -183,7 +208,7 @@ function ListaEventos() {
             Apenas Futuros
           </label>
 
-          {/* Botão condicional - apenas Gestores ou Parceiros podem criar novos eventos */}
+          {/* Botão Novo Evento */}
           {(isGestor || user?.tipoUsuario?.toLowerCase() === "parceiro") && (
             <button className="btn-novo" onClick={handleNovoEvento}>
               <FaPlus /> Novo Evento
@@ -202,15 +227,13 @@ function ListaEventos() {
         ) : (
           <table className="custom-table">
             <thead>
-              {/* Adicionei classes nas TH para travar a largura das colunas */}
               <tr>
                 <th className="col-nome">EVENTO</th>
                 <th className="col-data">DATA / HORÁRIO</th>
                 <th className="col-local">LOCAL</th>
                 <th className="col-acoes">
                   {isGestor ? "AÇÕES" : "DETALHES"}
-                </th>{" "}
-                {/*Título condicional */}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -225,7 +248,6 @@ function ListaEventos() {
                     </div>
                   </td>
                   <td>
-                    {/* Exibe a data e o horário em blocos separados */}
                     <div style={{ fontWeight: "500" }}>
                       {formatarData(evento.data)}
                     </div>
@@ -246,7 +268,6 @@ function ListaEventos() {
                   </td>
                   <td>
                     <div className="actions">
-                      {/* Tratamento da visibilidade dos botões de ação */}
                       {isGestor ||
                       (user?.tipoUsuario?.toLowerCase() === "parceiro" &&
                         evento.parceiroId === user.id) ? (
@@ -259,7 +280,6 @@ function ListaEventos() {
                             <FaPen size={12} />
                           </button>
 
-                          {/* Apenas Gestor vê o botão de excluir */}
                           {isGestor && (
                             <button
                               className="btn-action btn-delete"
@@ -271,19 +291,37 @@ function ListaEventos() {
                           )}
                         </>
                       ) : (
-                        /* Botão de visualização habilitado com onClick para o modal */
-                        <button
-                          className="btn-action"
-                          title="Ver Detalhes"
-                          style={{
-                            backgroundColor: "#17a2b8",
-                            color: "#fff",
-                            border: "none",
-                          }}
-                          onClick={() => handleVerDetalhes(evento)}
-                        >
-                          <FaEye size={12} />
-                        </button>
+                        // Ações para Usuário Comum
+                        <div style={{ display: "flex", gap: "5px" }}>
+                            <button
+                              className="btn-action"
+                              title="Ver Detalhes"
+                              style={{
+                                backgroundColor: "#17a2b8",
+                                color: "#fff",
+                                border: "none",
+                              }}
+                              onClick={() => handleVerDetalhes(evento)}
+                            >
+                              <FaEye size={12} />
+                            </button>
+
+                            {/* [NOVO] Botão Avaliar na linha da tabela */}
+                            {user && (
+                                <button
+                                    className="btn-action"
+                                    title="Avaliar este evento"
+                                    style={{
+                                        backgroundColor: "#f1c40f",
+                                        color: "#fff",
+                                        border: "none"
+                                    }}
+                                    onClick={() => handleAbrirAvaliacao(evento)}
+                                >
+                                    <FaStar size={12} />
+                                </button>
+                            )}
+                        </div>
                       )}
                     </div>
                   </td>
@@ -380,6 +418,61 @@ function ListaEventos() {
           </div>
         </div>
       )}
+
+      {/* --- [NOVO] MODAL DE AVALIAÇÃO --- */}
+      {modalAvaliacaoAberto && eventoParaAvaliar && (
+        <div className="modal-overlay">
+          <div className="modal-content-custom">
+            <div className="modal-header">
+              <h3>Avaliar: {eventoParaAvaliar.nome}</h3>
+              <button onClick={() => setModalAvaliacaoAberto(false)} className="modal-close-btn">
+                <FaTimes />
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div className="detail-item">
+                <label className="detail-label">Nota (1 a 5 estrelas)</label>
+                <select
+                  className="form-control"
+                  style={{ width: "100%", padding: "8px", marginTop: "5px" }}
+                  value={dadosAvaliacao.estrelas}
+                  onChange={(e) => setDadosAvaliacao({ ...dadosAvaliacao, estrelas: parseInt(e.target.value) })}
+                >
+                  <option value="5">5 Estrelas (Excelente)</option>
+                  <option value="4">4 Estrelas (Muito Bom)</option>
+                  <option value="3">3 Estrelas (Bom)</option>
+                  <option value="2">2 Estrelas (Ruim)</option>
+                  <option value="1">1 Estrela (Péssimo)</option>
+                </select>
+              </div>
+
+              <div className="detail-item" style={{ marginTop: "15px" }}>
+                <label className="detail-label">Comentário</label>
+                <textarea
+                  className="form-control"
+                  rows="4"
+                  style={{ width: "100%", padding: "8px", marginTop: "5px" }}
+                  placeholder="Conte sua experiência com este evento..."
+                  value={dadosAvaliacao.descricao}
+                  onChange={(e) => setDadosAvaliacao({ ...dadosAvaliacao, descricao: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button 
+                onClick={handleSalvarAvaliacao} 
+                className="btn-novo" 
+                style={{ backgroundColor: "#28a745", border: "none" }}
+              >
+                Enviar Avaliação
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
