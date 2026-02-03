@@ -1,7 +1,23 @@
 import api from './axiosConfig';
 
 // ===============================
-// Avaliações do usuário logado
+// 1. Listar TODAS avaliações de um Ponto (Público) - [NOVO]
+// ===============================
+export const getAvaliacoesPorPonto = async (pontoId) => {
+    if (!pontoId) return [];
+
+    try {
+        const response = await api.get(`/pontos-turisticos/${pontoId}/avaliacoes`);
+        return response.data; // Retorna a lista de AvaliacaoResponseDTO
+    } catch (error) {
+        console.error("Erro ao buscar avaliações do ponto:", error.response?.data || error.message);
+        // Retorna array vazio em caso de erro para não quebrar a tela de listagem
+        return []; 
+    }
+};
+
+// ===============================
+// 2. Avaliações do usuário logado (Minhas Avaliações)
 // ===============================
 export const getMinhasAvaliacoes = async () => {
     try {
@@ -14,14 +30,14 @@ export const getMinhasAvaliacoes = async () => {
 };
 
 // ===============================
-// Criar avaliação (Ponto ou Evento)
+// 3. Criar avaliação (Ponto ou Evento)
 // ===============================
 export const saveAvaliacao = async (itemId, data, tipo) => {
     if (!itemId || !tipo) {
         throw new Error("Parâmetros inválidos para salvar avaliação");
     }
 
-    // Define a rota com base na aba ativa ("pontos" ou "eventos")
+    // Define a rota com base na aba ativa ou tipo passado ("pontos" ou "eventos")
     const rota =
         tipo === 'pontos'
             ? `/pontos-turisticos/${itemId}/avaliacoes/save`
@@ -34,7 +50,7 @@ export const saveAvaliacao = async (itemId, data, tipo) => {
         });
         return response.data;
     } catch (error) {
-        // Log melhorado para mostrar a mensagem do Backend
+        // Log melhorado para capturar a mensagem exata do Spring Boot
         const mensagemErro = error.response?.data?.message || error.response?.data || error.message;
         console.error(`Erro ao salvar avaliação (${tipo}):`, mensagemErro);
         
@@ -44,7 +60,7 @@ export const saveAvaliacao = async (itemId, data, tipo) => {
 };
 
 // ===============================
-// Atualizar avaliação existente
+// 4. Atualizar avaliação existente
 // ===============================
 export const updateAvaliacao = async (id, data) => {
     if (!id) {
@@ -60,5 +76,18 @@ export const updateAvaliacao = async (id, data) => {
     } catch (error) {
         console.error("Erro ao atualizar avaliação:", error.response?.data || error.message);
         throw error;
+    }
+};
+
+
+export const getAvaliacoesPorEvento = async (eventoId) => {
+    if (!eventoId) return [];
+
+    try {
+        const response = await api.get(`/eventos/${eventoId}/avaliacoes`);
+        return response.data;
+    } catch (error) {
+        console.error("Erro ao buscar avaliações do evento:", error.response?.data || error.message);
+        return [];
     }
 };

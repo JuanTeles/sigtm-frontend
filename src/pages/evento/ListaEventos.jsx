@@ -1,3 +1,5 @@
+// src/pages/evento/ListaEventos.jsx
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -5,7 +7,8 @@ import {
   deleteEvento,
   getEventosFuturos,
 } from "../../api/eventoService";
-import { saveAvaliacao } from "../../api/avaliacaoService"; // [NOVO] Importação necessária
+// [IMPORT ATUALIZADO] Adicionado getAvaliacoesPorEvento
+import { saveAvaliacao, getAvaliacoesPorEvento } from "../../api/avaliacaoService";
 import {
   FaCalendarAlt,
   FaPen,
@@ -13,7 +16,8 @@ import {
   FaPlus,
   FaEye,
   FaTimes,
-  FaStar, 
+  FaStar,
+  FaUserCircle // [IMPORT NOVO]
 } from "react-icons/fa";
 import { useAuth } from "../../contexts/authContext";
 import "../../css/Evento.css";
@@ -33,7 +37,11 @@ function ListaEventos() {
   const [modalAberto, setModalAberto] = useState(false);
   const [eventoSelecionado, setEventoSelecionado] = useState(null);
 
-  // [NOVO] Estados para o Modal de Avaliação
+  // [NOVOS ESTADOS] Para carregar a lista de avaliações dentro do modal de detalhes
+  const [avaliacoesDoEvento, setAvaliacoesDoEvento] = useState([]);
+  const [loadingAvaliacoes, setLoadingAvaliacoes] = useState(false);
+
+  // Estados para o Modal de Avaliação (Cadastro)
   const [modalAvaliacaoAberto, setModalAvaliacaoAberto] = useState(false);
   const [eventoParaAvaliar, setEventoParaAvaliar] = useState(null);
   const [dadosAvaliacao, setDadosAvaliacao] = useState({ estrelas: 5, descricao: "" });
@@ -92,18 +100,32 @@ function ListaEventos() {
     }
   };
 
-  // Funções para abrir e fechar o modal de Detalhes
-  const handleVerDetalhes = (evento) => {
+  // [ALTERADO] Função para abrir modal de detalhes e carregar avaliações
+  const handleVerDetalhes = async (evento) => {
     setEventoSelecionado(evento);
     setModalAberto(true);
+
+    // Reseta lista e inicia loading
+    setAvaliacoesDoEvento([]);
+    setLoadingAvaliacoes(true);
+
+    try {
+        const data = await getAvaliacoesPorEvento(evento.id);
+        setAvaliacoesDoEvento(data);
+    } catch (error) {
+        console.error("Erro ao carregar avaliações no modal:", error);
+    } finally {
+        setLoadingAvaliacoes(false);
+    }
   };
 
   const fecharModal = () => {
     setModalAberto(false);
     setEventoSelecionado(null);
+    setAvaliacoesDoEvento([]); // Limpa ao fechar
   };
 
-  // [NOVO] Funções para o Modal de Avaliação
+  // Funções para o Modal de Avaliação (Cadastro)
   const handleAbrirAvaliacao = (evento) => {
     setEventoParaAvaliar(evento);
     setDadosAvaliacao({ estrelas: 5, descricao: "" }); // Resetar formulário
@@ -123,7 +145,7 @@ function ListaEventos() {
       setModalAvaliacaoAberto(false);
     } catch (error) {
       console.error(error);
-      alert("Erro ao salvar avaliação. Verifique se você já avaliou este evento.");
+      alert(error.message || "Erro ao salvar avaliação. Verifique se você já avaliou este evento.");
     }
   };
 
@@ -149,6 +171,13 @@ function ListaEventos() {
   const formatarEndereco = (end) => {
     if (!end) return "Endereço não informado";
     return `${end.rua || ""}, ${end.numero || "S/N"} - ${end.bairro || ""}, ${end.cidade || ""}/${end.estado || ""}`;
+  };
+
+  // Helper para renderizar estrelas na lista
+  const renderEstrelas = (qtd) => {
+    return [...Array(5)].map((_, i) => (
+        <FaStar key={i} size={14} color={i < qtd ? "#f1c40f" : "#e4e5e9"} />
+    ));
   };
 
   if (loading)
@@ -295,7 +324,7 @@ function ListaEventos() {
                         <div style={{ display: "flex", gap: "5px" }}>
                             <button
                               className="btn-action"
-                              title="Ver Detalhes"
+                              title="Ver Detalhes e Avaliações"
                               style={{
                                 backgroundColor: "#17a2b8",
                                 color: "#fff",
@@ -306,21 +335,7 @@ function ListaEventos() {
                               <FaEye size={12} />
                             </button>
 
-                            {/* [NOVO] Botão Avaliar na linha da tabela */}
-                            {user && (
-                                <button
-                                    className="btn-action"
-                                    title="Avaliar este evento"
-                                    style={{
-                                        backgroundColor: "#f1c40f",
-                                        color: "#fff",
-                                        border: "none"
-                                    }}
-                                    onClick={() => handleAbrirAvaliacao(evento)}
-                                >
-                                    <FaStar size={12} />
-                                </button>
-                            )}
+                            
                         </div>
                       )}
                     </div>
@@ -332,10 +347,10 @@ function ListaEventos() {
         )}
       </div>
 
-      {/* --- MODAL DE DETALHES  --- */}
+      {/* --- MODAL DE DETALHES + LISTA DE AVALIAÇÕES --- */}
       {modalAberto && eventoSelecionado && (
         <div className="modal-overlay">
-          <div className="modal-content-custom">
+          <div className="modal-content-custom" style={{ maxWidth: '600px' }}>
             <div className="modal-header">
               <h3>{eventoSelecionado.nome}</h3>
               <button onClick={fecharModal} className="modal-close-btn">
@@ -344,6 +359,7 @@ function ListaEventos() {
             </div>
 
             <div className="modal-body">
+              {/* --- Detalhes do Evento --- */}
               <div className="detail-item">
                 <span className="detail-label">Descrição</span>
                 <span className="detail-value">
@@ -408,6 +424,61 @@ function ListaEventos() {
                   </span>
                 </div>
               )}
+
+              {/* --- SEÇÃO DE AVALIAÇÕES --- */}
+              <hr style={{ margin: "20px 0", border: "0", borderTop: "1px solid #eee" }} />
+              
+              <h4 style={{ 
+                  fontSize: "1.1rem", 
+                  color: "#333", 
+                  marginBottom: "15px", 
+                  display: "flex", 
+                  alignItems: "center", 
+                  gap: "8px" 
+              }}>
+                <FaStar color="#f1c40f" /> O que dizem sobre este evento
+              </h4>
+
+              {loadingAvaliacoes ? (
+                <p style={{ color: "#666", fontStyle: "italic", textAlign: "center" }}>Carregando avaliações...</p>
+              ) : avaliacoesDoEvento.length === 0 ? (
+                <p style={{ 
+                    color: "#999", 
+                    textAlign: "center", 
+                    padding: "15px", 
+                    background: "#f9f9f9", 
+                    borderRadius: "8px" 
+                }}>
+                   Ainda não há avaliações para este evento.
+                </p>
+              ) : (
+                <div style={{ maxHeight: "250px", overflowY: "auto", paddingRight: "5px" }}>
+                   {avaliacoesDoEvento.map((av) => (
+                     <div key={av.id} style={{ 
+                        backgroundColor: "#fff", 
+                        border: "1px solid #e0e0e0", 
+                        borderRadius: "8px", 
+                        padding: "12px", 
+                        marginBottom: "10px",
+                        boxShadow: "0 1px 2px rgba(0,0,0,0.03)"
+                     }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: "600", color: "#444" }}>
+                                <FaUserCircle color="#ccc" size={20} />
+                                <span>{av.nomeAutor || "Visitante Anônimo"}</span>
+                            </div>
+                            <div title={`${av.estrelas} Estrelas`}>
+                                {renderEstrelas(av.estrelas)}
+                            </div>
+                        </div>
+                        <p style={{ margin: "0 0 0 28px", color: "#555", fontSize: "0.9rem", lineHeight: "1.4" }}>
+                            {av.descricao}
+                        </p>
+                     </div>
+                   ))}
+                </div>
+              )}
+
             </div>
 
             <div className="modal-footer">
@@ -419,59 +490,7 @@ function ListaEventos() {
         </div>
       )}
 
-      {/* --- [NOVO] MODAL DE AVALIAÇÃO --- */}
-      {modalAvaliacaoAberto && eventoParaAvaliar && (
-        <div className="modal-overlay">
-          <div className="modal-content-custom">
-            <div className="modal-header">
-              <h3>Avaliar: {eventoParaAvaliar.nome}</h3>
-              <button onClick={() => setModalAvaliacaoAberto(false)} className="modal-close-btn">
-                <FaTimes />
-              </button>
-            </div>
-
-            <div className="modal-body">
-              <div className="detail-item">
-                <label className="detail-label">Nota (1 a 5 estrelas)</label>
-                <select
-                  className="form-control"
-                  style={{ width: "100%", padding: "8px", marginTop: "5px" }}
-                  value={dadosAvaliacao.estrelas}
-                  onChange={(e) => setDadosAvaliacao({ ...dadosAvaliacao, estrelas: parseInt(e.target.value) })}
-                >
-                  <option value="5">5 Estrelas (Excelente)</option>
-                  <option value="4">4 Estrelas (Muito Bom)</option>
-                  <option value="3">3 Estrelas (Bom)</option>
-                  <option value="2">2 Estrelas (Ruim)</option>
-                  <option value="1">1 Estrela (Péssimo)</option>
-                </select>
-              </div>
-
-              <div className="detail-item" style={{ marginTop: "15px" }}>
-                <label className="detail-label">Comentário</label>
-                <textarea
-                  className="form-control"
-                  rows="4"
-                  style={{ width: "100%", padding: "8px", marginTop: "5px" }}
-                  placeholder="Conte sua experiência com este evento..."
-                  value={dadosAvaliacao.descricao}
-                  onChange={(e) => setDadosAvaliacao({ ...dadosAvaliacao, descricao: e.target.value })}
-                />
-              </div>
-            </div>
-
-            <div className="modal-footer">
-              <button 
-                onClick={handleSalvarAvaliacao} 
-                className="btn-novo" 
-                style={{ backgroundColor: "#28a745", border: "none" }}
-              >
-                Enviar Avaliação
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      
 
     </div>
   );
