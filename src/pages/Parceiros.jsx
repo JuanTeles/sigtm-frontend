@@ -95,7 +95,7 @@ const TelaListaParceiros = () => {
             <h2 className="fw-bold text-primary m-0">Parceiros Cadastrados</h2>
             <p className="text-muted small m-0">Gerencie as empresas parceiras do sistema.</p>
           </div>
-          <Link to="/TelaListagemSolicitacoes" className="btn btn-outline-primary rounded-pill px-4 py-2 fw-bold shadow-sm d-flex align-items-center gap-2">
+          <Link to="/admin/solicitacoes" className="btn btn-outline-primary rounded-pill px-4 py-2 fw-bold shadow-sm d-flex align-items-center gap-2">
             <span>📋</span> Ver Solicitações Pendentes
           </Link>
         </div>

@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import {
+  getSolicitacoes,
+  getSolicitacaoById,
+  createSolicitacao,
+  deleteSolicitacao
+} from '../api/SolicitacaoService';
 
 const TelaListagemSolicitacoes = () => {
-  // Dados simulados (3 entidades de exemplo)
-const [solicitacoes, setSolicitacoes] = useState([
-    { id: 1, parceiro: "João da Silva", empresa: "Restaurante Sabor", cnpj: "12.345.678/0001-90", status: "Pendente" },
-    { id: 2, parceiro: "Maria Oliveira", empresa: "Pousada Sol", cnpj: "98.765.432/0001-10", status: "Pendente" },
-  ]);
+  const [solicitacoes, setSolicitacoes] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   // Estados para Modais
   const [showModalRecusar, setShowModalRecusar] = useState(false);
@@ -20,10 +23,52 @@ const [solicitacoes, setSolicitacoes] = useState([
 
   // Confirmação da recusa
   const handleConfirmarRecusa = () => {
-    setSolicitacoes(solicitacoes.filter(s => s.id !== itemSelecionado.id));
-    setShowModalRecusar(false);
-    alert("Solicitação recusada e removida.");
+    (async () => {
+      try {
+        await deleteSolicitacao(itemSelecionado.id);
+        setSolicitacoes(prev => prev.filter(s => s.id !== itemSelecionado.id));
+        setShowModalRecusar(false);
+        alert('Solicitação recusada e removida.');
+      } catch (err) {
+        console.error(err);
+        alert('Erro ao recusar solicitação. Verifique o console.');
+      }
+    })();
   };
+
+  const handleAprovar = async (item) => {
+    if (!window.confirm(`Aprovar solicitação de ${item.empresa || item.nomeEmpresa || 'entidade'}?`)) return;
+    try {
+      // Observação: o backend mostrado não possui endpoint de "aprovar" explícito.
+      // Por enquanto removemos a solicitação localmente (como se tivesse sido processada)
+      // e chamamos o DELETE para limpar a solicitação no servidor.
+      await deleteSolicitacao(item.id);
+      setSolicitacoes(prev => prev.filter(s => s.id !== item.id));
+      alert('Solicitação aprovada (processamento básico).');
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao aprovar solicitação. Verifique o console.');
+    }
+  };
+
+  // Carrega solicitações do backend
+  const loadSolicitacoes = async () => {
+    setLoading(true);
+    try {
+      const data = await getSolicitacoes();
+      // Não filtrar no front — exibe o que o backend retornar.
+      setSolicitacoes(data || []);
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao carregar solicitações.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadSolicitacoes();
+  }, []);
 
   return (
     <div className="min-vh-100 bg-light py-5 font-sans">
@@ -74,7 +119,12 @@ const [solicitacoes, setSolicitacoes] = useState([
                 </tr>
               </thead>
               <tbody>
-                {solicitacoes.map((item) => (
+                {solicitacoes.length === 0 && !loading ? (
+                  <tr>
+                    <td colSpan={5} className="text-center py-4 text-muted">Nenhuma solicitação encontrada.</td>
+                  </tr>
+                ) : (
+                solicitacoes.map((item) => (
                   <tr key={item.id} style={{ cursor: 'pointer' }}>
                     
                     {/* Coluna Empresa/Parceiro */}
@@ -97,16 +147,16 @@ const [solicitacoes, setSolicitacoes] = useState([
 
                     {/* Coluna Contato */}
                     <td className="border-bottom-0">
-                      <div className="d-flex flex-column">
-                        <span className="text-dark small fw-semibold">📧 {item.email}</span>
-                        <span className="text-muted small">📱 {item.telefone}</span>
+                        <div className="d-flex flex-column">
+                        <span className="text-dark small fw-semibold">📧 {item.email || item.usuarioEmail || item.usuario?.email || '-'}</span>
+                        <span className="text-muted small">📱 {item.telefone || item.usuarioTelefone || '-'}</span>
                       </div>
                     </td>
 
                     {/* Coluna Status */}
                     <td className="border-bottom-0">
                       <span className="badge bg-warning text-dark bg-opacity-25 border border-warning rounded-pill px-3">
-                        {item.status}
+                        {item.status || item.situacao || item.solicitacaoStatus || 'Pendente'}
                       </span>
                     </td>
 
@@ -119,14 +169,14 @@ const [solicitacoes, setSolicitacoes] = useState([
                         >
                           ❌
                         </button>
-                        <button className="btn btn-success btn-sm rounded-3 px-3 fw-bold shadow-sm" title="Aprovar">
+                        <button onClick={() => handleAprovar(item)} className="btn btn-success btn-sm rounded-3 px-3 fw-bold shadow-sm" title="Aprovar">
                           ✓ Aprovar
                         </button>
                       </div>
                     </td>
 
                   </tr>
-                ))}
+                ))) }
               </tbody>
             </table>
           </div>

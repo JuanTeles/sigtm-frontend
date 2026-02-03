@@ -37,11 +37,11 @@ const Header = () => {
             </li>
 
             {/* MOSTRAR APENAS SE FOR ADMIN */}
-            {signed && user?.tipoUsuario?.nome === 'ADMIN' && (
+           {} 
               <li className="nav-item">
                 <Link className="nav-link text-white fw-bold" to="/admin" onClick={() => setIsMenuOpen(false)}>Painel Admin</Link>
               </li>
-            )}
+           
 
             {/* MOSTRAR APENAS SE ESTIVER LOGADO */}
             {signed && (
